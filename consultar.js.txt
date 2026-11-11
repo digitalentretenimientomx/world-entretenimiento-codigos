@@ -1,0 +1,76 @@
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+
+// Inicializar Firebase Admin (asegúrese de configurar sus credenciales en las variables de entorno de Vercel)
+if (!getApps().length) {
+    initializeApp({
+        credential: cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            // Reemplaza los saltos de línea en la clave privada si es necesario
+            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined
+        })
+    });
+}
+
+const db = getFirestore();
+
+export default async function handler(req, res) {
+    // Permitir CORS
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
+    const { correo, asunto } = req.query;
+
+    if (!correo) {
+        return res.status(400).json({ success: false, message: "Falta el parámetro de correo." });
+    }
+
+    try {
+        // Consultar directamente en Firestore (ajuste el nombre de su colección si es diferente, ej: 'codigos' o 'mensajes')
+        const snapshot = await db.collection('codigos')
+            .where('correo', '==', correo.trim())
+            .orderBy('fecha', 'desc')
+            .limit(5)
+            .get();
+
+        if (snapshot.empty) {
+            return res.status(200).json({ 
+                success: false, 
+                message: "No se encontraron registros recientes para este correo en la base de datos." 
+            });
+        }
+
+        let documentoEncontrado = null;
+
+        // Si se especificó un asunto o plataforma, filtramos el más adecuado
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (!documentoEncontrado) {
+                documentoEncontrado = data;
+            }
+        });
+
+        if (documentoEncontrado) {
+            return res.status(200).json({
+                success: true,
+                codigo: documentoEncontrado.codigo || "------",
+                asunto: documentoEncontrado.asunto || asunto || "Verificación",
+                cuerpo: documentoEncontrado.cuerpo || documentoEncontrado.mensaje || "Sin contenido detallado",
+                fecha: documentoEncontrado.fecha ? new Date(documentoEncontrado.fecha.toDate ? documentoEncontrado.fecha.toDate() : documentoEncontrado.fecha).toLocaleString() : "Reciente"
+            });
+        } else {
+            return res.status(200).json({ success: false, message: "No se encontró ningún código coincidente." });
+        }
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Error al consultar la base de datos: " + error.toString() });
+    }
+}
