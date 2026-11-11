@@ -4,6 +4,7 @@
   "description": "Sistema de consulta automatizada de codigos IMAP",
   "main": "api/consultar.js",
   "dependencies": {
+    "firebase-admin": "^12.0.0",
     "imap": "^0.8.19",
     "mailparser": "^3.7.1"
   }
