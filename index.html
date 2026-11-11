@@ -3,78 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODE CODEX - Páginas de Códigos</title>
+    <title>CODE CODEX - Panel Administrativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0b132b] text-white font-sans antialiased min-h-screen relative overflow-x-hidden">
 
-    <!-- Fondo con efecto de códigos / estilo matriz sutil -->
+    <!-- Fondo Matrix sutil -->
     <div class="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden flex justify-around text-xs font-mono text-yellow-500">
         <div>2026 8735 9941 1029 4432<br>0192 8374 5561 2234 9980</div>
         <div>5541 2234 9980 2026 8735<br>9941 1029 4432 0192 8374</div>
-        <div>8374 5561 2026 8735 9941<br>1029 4432 0192 5561 2234</div>
     </div>
 
-    <!-- Cabecera de la Página Principal -->
-    <header class="relative z-10 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
-        <div class="text-xl font-bold tracking-wider text-yellow-400 flex items-center gap-1">
-            CODE<span class="text-white">CODEX</span>
-        </div>
-        <div>
-            <button onclick="alternarVistaAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-yellow-400 px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
+    <!-- PÁGINA PÚBLICA DE CÓDIGOS -->
+    <div id="vistaPublica" class="relative z-10 flex flex-col min-h-screen justify-between">
+        <header class="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto w-full">
+            <div class="text-xl font-bold tracking-wider text-yellow-400 flex items-center gap-1">
+                CODE<span class="text-white">CODEX</span>
+            </div>
+            <button onclick="abrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-yellow-400 px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
                 <span>🔑</span> Iniciar Sesión
             </button>
-        </div>
-    </header>
+        </header>
 
-    <!-- VISTA 1: PÁGINA PÚBLICA DE CONSULTA DE CÓDIGOS -->
-    <main id="vistaPublica" class="relative z-10 flex flex-col items-center justify-center px-4 mt-16">
-        <div class="w-full max-w-xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/60 rounded-2xl p-8 shadow-2xl text-center space-y-6">
-            <h2 class="text-xl font-bold tracking-wide text-white uppercase">BIENVENIDOS A TU PAGINA DE CODIGOS</h2>
-            
-            <div class="space-y-4">
-                <input type="email" id="inputCorreoPublico" placeholder="tu@email.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 shadow-inner">
-                <button onclick="consultarCodigoPublico()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base">
-                    Buscar Email
-                </button>
+        <main class="flex flex-col items-center justify-center px-4 my-auto">
+            <div class="w-full max-w-xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/60 rounded-2xl p-8 shadow-2xl text-center space-y-6">
+                <h2 class="text-xl font-bold tracking-wide text-white uppercase">BIENVENIDOS A TU PAGINA DE CODIGOS</h2>
+                
+                <div class="space-y-4">
+                    <input type="email" id="inputCorreoPublico" placeholder="tu@email.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
+                    <button onclick="consultarCodigoPublico()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base">
+                        Buscar Email
+                    </button>
+                </div>
+                <div id="resultadoPublico" class="text-left"></div>
             </div>
+        </main>
 
-            <!-- Contenedor del Resultado -->
-            <div id="resultadoPublico" class="mt-4 text-left"></div>
-        </div>
-
-        <div class="mt-20 text-xs text-gray-500">
+        <footer class="text-center py-6 text-xs text-gray-500">
             Diseñado y creado por Leonardoplex | Versión 50
-        </div>
-    </main>
+        </footer>
+    </div>
 
-    <!-- VISTA 2: PANEL ADMINISTRATIVO (Oculto por defecto hasta dar en Iniciar Sesión) -->
+    <!-- PANEL ADMINISTRATIVO -->
     <div id="vistaAdmin" class="hidden fixed inset-0 bg-[#0b132b] z-50 flex">
-        <!-- Sidebar Admin -->
+        <!-- Sidebar -->
         <aside class="w-64 bg-[#1c2541] border-r border-gray-800 flex flex-col justify-between">
             <div>
                 <div class="p-6 text-xl font-bold tracking-wider text-yellow-400 flex items-center gap-2">
                     CODE<span class="text-white">CODEX</span>
                 </div>
                 <nav class="mt-6 space-y-1 px-4 text-sm">
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Dashboard</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Plataformas</a>
+                    <a href="#" onclick="cambiarSeccionAdmin('dashboard')" id="navDashboard" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Dashboard</a>
+                    <a href="#" onclick="cambiarSeccionAdmin('plataformas')" id="navPlataformas" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Plataformas</a>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Servidores</a>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Mi sitio público</a>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Registros</a>
                 </nav>
             </div>
             <div class="p-4 border-t border-gray-800">
-                <button onclick="cerrarSesionAdmin()" class="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition text-sm">Cerrar Sesión</button>
+                <button onclick="cerrarAdmin()" class="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition text-sm">Cerrar Sesión</button>
             </div>
         </aside>
 
-        <!-- Contenido Admin -->
+        <!-- Contenido Dinámico del Panel -->
         <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
             <header class="h-16 bg-[#1c2541]/50 border-b border-gray-800 flex items-center justify-between px-8">
                 <div>
-                    <h1 class="text-lg font-bold">Dashboard</h1>
-                    <p class="text-xs text-gray-400">Resumen del sistema</p>
+                    <h1 id="tituloSeccion" class="text-lg font-bold">Dashboard</h1>
+                    <p id="subtituloSeccion" class="text-xs text-gray-400">Resumen del sistema</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="text-sm text-gray-300">Hola, <strong>Mauricio</strong></span>
@@ -82,41 +78,128 @@
                 </div>
             </header>
 
-            <div class="p-8 space-y-6">
-                <!-- Tarjetas de Estadísticas -->
+            <!-- SECCIÓN: DASHBOARD -->
+            <div id="seccionDashboard" class="p-8 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-[#1c2541] p-5 rounded-xl border border-gray-800">
                         <p class="text-xs text-gray-400">Total Consultas</p>
-                        <h3 class="text-2xl font-bold mt-1 text-white">522</h3>
+                        <h3 class="text-2xl font-bold mt-1">522</h3>
                     </div>
                     <div class="bg-[#1c2541] p-5 rounded-xl border border-gray-800">
                         <p class="text-xs text-gray-400">Consultas Hoy</p>
-                        <h3 class="text-2xl font-bold mt-1 text-white">2</h3>
+                        <h3 class="text-2xl font-bold mt-1">2</h3>
                     </div>
                     <div class="bg-[#1c2541] p-5 rounded-xl border border-gray-800">
                         <p class="text-xs text-gray-400">Servidores IMAP</p>
-                        <h3 class="text-2xl font-bold mt-1 text-white">1</h3>
+                        <h3 class="text-2xl font-bold mt-1">1</h3>
                     </div>
                     <div class="bg-[#1c2541] p-5 rounded-xl border border-gray-800">
                         <p class="text-xs text-gray-400">Plataformas</p>
-                        <h3 class="text-2xl font-bold mt-1 text-white">5</h3>
+                        <h3 id="contadorPlataformas" class="text-2xl font-bold mt-1">3</h3>
                     </div>
                 </div>
-
-                <!-- Botón de retorno -->
-                <div class="pt-4">
-                    <button onclick="cerrarSesionAdmin()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+                <div>
+                    <button onclick="cerrarAdmin()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
                         ← Volver a la página principal de códigos
                     </button>
                 </div>
             </div>
+
+            <!-- SECCIÓN: PLATAFORMAS (LISTADO Y GESTIÓN) -->
+            <div id="seccionPlataformas" class="p-8 space-y-6 hidden">
+                <div class="flex justify-between items-center bg-[#1c2541] p-4 rounded-xl border border-gray-800">
+                    <input type="text" placeholder="Nombre o descripción..." class="w-96 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                    <button onclick="abrirNuevaPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-5 py-2.5 rounded-lg transition flex items-center gap-2">
+                        + Nueva Plataforma
+                    </button>
+                </div>
+
+                <!-- Tabla de Plataformas -->
+                <div class="bg-[#1c2541] rounded-xl border border-gray-800 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs uppercase text-gray-400 bg-[#161f36]">
+                                <th class="py-4 px-6">Plataforma</th>
+                                <th class="py-4 px-6">Asuntos Configurados</th>
+                                <th class="py-4 px-6">Estado</th>
+                                <th class="py-4 px-6 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaPlataformasBody" class="divide-y divide-gray-800 text-sm">
+                            <!-- Datos precargados de ejemplo -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: NUEVA / EDITAR PLATAFORMA Y ASUNTOS -->
+            <div id="seccionFormPlataforma" class="p-8 space-y-6 hidden">
+                <div class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4">
+                    <h3 id="formTitulo" class="text-lg font-bold text-yellow-400">Nueva Plataforma</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-gray-400">Nombre de la Plataforma *</label>
+                            <input type="text" id="inputNombrePlat" placeholder="Netflix, Disney+, etc." class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400">Slug *</label>
+                            <input type="text" id="inputSlugPlat" placeholder="netflix, disney" class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Imagen de Portada (URL o Nombre)</label>
+                        <input type="text" id="inputImagenPlat" placeholder="https://..." class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="checkActiva" checked class="rounded bg-[#0b132b] border-gray-700 text-yellow-400">
+                        <label class="text-sm">Plataforma activa</label>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="guardarPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-6 py-2 rounded-lg transition">Crear Plataforma</button>
+                        <button onclick="cambiarSeccionAdmin('plataformas')" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg transition">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Módulo de Asuntos Configurados (Visible al Editar) -->
+                <div id="contenedorAsuntos" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-white">Asuntos Configurados</h4>
+                            <p class="text-xs text-gray-400">Palabras clave o asuntos que el sistema buscará en los correos</p>
+                        </div>
+                        <button onclick="mostrarInputAsunto()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">+ Agregar Asunto</button>
+                    </div>
+
+                    <!-- Input oculto para agregar asunto -->
+                    <div id="formAgregarAsunto" class="hidden flex gap-3 pt-2">
+                        <input type="text" id="inputNuevoAsunto" placeholder="Ej: Tu código de acceso único para Disney+" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                        <button onclick="guardarAsunto()" class="bg-green-500 hover:bg-green-600 text-gray-950 font-bold px-5 py-2 rounded-lg transition">Guardar</button>
+                        <button onclick="ocultarInputAsunto()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition">Cancelar</button>
+                    </div>
+
+                    <div id="listaAsuntos" class="space-y-2 pt-2">
+                        <!-- Asuntos listados aquí -->
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <!-- Script de Funcionalidad y Google Apps Script -->
+    <!-- Script General y Google Apps Script -->
     <script>
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3lmpp3cjfbqepZipEoJEjxjr76zTO-GcpqmOgQ5DytkFwkQsPjY7wp6rUEBNsf4Ek/exec';
 
+    // Base de datos local simulada para plataformas y asuntos
+    let plataformasData = [
+        { id: 1, nombre: "CRUNCHYROLL", slug: "crunchyroll", activo: true, asuntos: ["Confirma tu nuevo inicio de sesión en Crunchyroll"] },
+        { id: 2, nombre: "DISNEY", slug: "disney", activo: true, asuntos: ["Tu código de acceso único para Disney+"] },
+        { id: 3, nombre: "HBO", slug: "hbo", activo: true, asuntos: ["Tu código de verificación de Max"] }
+    ];
+
+    let plataformaEnEdicionId = null;
+
+    // Consulta Pública con Google Apps Script y filtrado de asunto de plataforma
     async function consultarCodigoPublico() {
         const correo = document.getElementById('inputCorreoPublico').value.trim();
         const contenedor = document.getElementById('resultadoPublico');
@@ -126,15 +209,18 @@
             return;
         }
 
-        contenedor.innerHTML = "<div class='p-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando código en el buzón...</div>";
+        contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando código en el buzón...</div>";
 
         try {
-            const respuesta = await fetch(`${GOOGLE_SCRIPT_URL}?correo=${encodeURIComponent(correo)}`);
+            // Intenta buscar con el primer asunto configurado de la primera plataforma activa como respaldo
+            let asuntoBusqueda = plataformasData.length > 0 && plataformasData[0].asuntos.length > 0 ? plataformasData[0].asuntos[0] : "";
+            
+            const respuesta = await fetch(`${GOOGLE_SCRIPT_URL}?correo=${encodeURIComponent(correo)}&asunto=${encodeURIComponent(asuntoBusqueda)}`);
             const resultado = await respuesta.json();
 
             if (resultado.success) {
                 contenedor.innerHTML = `
-                    <div class='p-4 bg-green-500/10 border border-green-500/30 rounded-xl space-y-2'>
+                    <div class='p-4 mt-4 bg-green-500/10 border border-green-500/30 rounded-xl space-y-2'>
                         <div class='text-green-400 font-bold text-sm'>¡Código encontrado con éxito!</div>
                         <div class='text-white text-sm'><strong>Asunto:</strong> ${resultado.asunto}</div>
                         <div class='text-yellow-300 text-xl font-bold tracking-wider'>Código: ${resultado.codigo}</div>
@@ -142,7 +228,7 @@
                 `;
             } else {
                 contenedor.innerHTML = `
-                    <div class='p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
+                    <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
                         ${resultado.message || "No se encontró ningún código reciente."}
                     </div>
                 `;
@@ -150,19 +236,180 @@
         } catch (error) {
             console.error("Error:", error);
             contenedor.innerHTML = `
-                <div class='p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
+                <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
                     Error al conectar con el servidor de consulta.
                 </div>
             `;
         }
     }
 
-    function alternarVistaAdmin() {
-        document.getElementById('vistaAdmin').classList.remove('hidden');
+    // Navegación Admin
+    function abrirAdmin() { document.getElementById('vistaAdmin').classList.remove('hidden'); }
+    function cerrarAdmin() { document.getElementById('vistaAdmin').classList.add('hidden'); }
+
+    function cambiarSeccionAdmin(seccion) {
+        document.getElementById('seccionDashboard').classList.add('hidden');
+        document.getElementById('seccionPlataformas').classList.add('hidden');
+        document.getElementById('seccionFormPlataforma').classList.add('hidden');
+
+        document.getElementById('navDashboard').className = "flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition";
+        document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition";
+
+        if (seccion === 'dashboard') {
+            document.getElementById('seccionDashboard').classList.remove('hidden');
+            document.getElementById('navDashboard').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
+            document.getElementById('tituloSeccion').innerText = "Dashboard";
+            document.getElementById('subtituloSeccion').innerText = "Resumen del sistema";
+        } else if (seccion === 'plataformas') {
+            document.getElementById('seccionPlataformas').classList.remove('hidden');
+            document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
+            document.getElementById('tituloSeccion').innerText = "Plataformas";
+            document.getElementById('subtituloSeccion').innerText = "Gestiona las plataformas de streaming";
+            renderizarTablaPlataformas();
+        }
     }
 
-    function cerrarSesionAdmin() {
-        document.getElementById('vistaAdmin').classList.add('hidden');
+    function renderizarTablaPlataformas() {
+        const tbody = document.getElementById('tablaPlataformasBody');
+        tbody.innerHTML = "";
+        document.getElementById('contadorPlataformas').innerText = plataformasData.length;
+
+        plataformasData.forEach(plat => {
+            tbody.innerHTML += `
+                <tr class="hover:bg-[#222d4a] transition">
+                    <td class="py-4 px-6 flex items-center gap-3 font-bold">
+                        <div class="w-8 h-8 rounded bg-yellow-600/30 text-yellow-400 flex items-center justify-center text-xs">🎮</div>
+                        ${plat.nombre}
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="bg-blue-900/50 text-blue-300 text-xs px-2.5 py-1 rounded-full border border-blue-700">${plat.asuntos.length} asuntos</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="bg-green-500/10 text-green-400 text-xs px-2.5 py-1 rounded-full border border-green-500/20">${plat.activo ? 'Activo' : 'Inactivo'}</span>
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <button onclick="editarPlataforma(${plat.id})" class="text-gray-400 hover:text-yellow-400 transition" title="Editar">✏️</button>
+                        <button onclick="eliminarPlataforma(${plat.id})" class="text-gray-400 hover:text-red-400 transition" title="Eliminar">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function abrirNuevaPlataforma() {
+        plataformaEnEdicionId = null;
+        document.getElementById('seccionPlataformas').classList.add('hidden');
+        document.getElementById('seccionFormPlataforma').classList.remove('hidden');
+        document.getElementById('formTitulo').innerText = "Nueva Plataforma";
+        document.getElementById('inputNombrePlat').value = "";
+        document.getElementById('inputSlugPlat').value = "";
+        document.getElementById('inputImagenPlat').value = "";
+        document.getElementById('checkActiva').checked = true;
+        document.getElementById('contenedorAsuntos').classList.add('hidden');
+        document.getElementById('tituloSeccion').innerText = "Nueva Plataforma";
+    }
+
+    function editarPlataforma(id) {
+        plataformaEnEdicionId = id;
+        const plat = plataformasData.find(p => p.id === id);
+        if (!plat) return;
+
+        document.getElementById('seccionPlataformas').classList.add('hidden');
+        document.getElementById('seccionFormPlataforma').classList.remove('hidden');
+        document.getElementById('formTitulo').innerText = "Editar Plataforma";
+        document.getElementById('inputNombrePlat').value = plat.nombre;
+        document.getElementById('inputSlugPlat').value = plat.slug;
+        document.getElementById('checkActiva').checked = plat.activo;
+        document.getElementById('contenedorAsuntos').classList.remove('hidden');
+        document.getElementById('tituloSeccion').innerText = "Editar Plataforma: " + plat.nombre;
+        renderizarAsuntos(plat);
+    }
+
+    function guardarPlataforma() {
+        const nombre = document.getElementById('inputNombrePlat').value.trim();
+        const slug = document.getElementById('inputSlugPlat').value.trim();
+        const activo = document.getElementById('checkActiva').checked;
+
+        if (!nombre || !slug) {
+            alert("Por favor completa los campos obligatorios.");
+            return;
+        }
+
+        if (plataformaEnEdicionId === null) {
+            // Crear nueva
+            const nueva = {
+                id: Date.now(),
+                nombre,
+                slug,
+                activo,
+                asuntos: []
+            };
+            plataformasData.push(nueva);
+            editarPlataforma(nueva.id);
+        } else {
+            // Actualizar existente
+            const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
+            if (plat) {
+                plat.nombre = nombre;
+                plat.slug = slug;
+                plat.activo = activo;
+            }
+            alert("Plataforma actualizada correctamente.");
+            cambiarSeccionAdmin('plataformas');
+        }
+    }
+
+    function eliminarPlataforma(id) {
+        if (confirm("¿Estás seguro de eliminar esta plataforma?")) {
+            plataformasData = plataformasData.filter(p => p.id !== id);
+            renderizarTablaPlataformas();
+        }
+    }
+
+    function mostrarInputAsunto() {
+        document.getElementById('formAgregarAsunto').classList.remove('hidden');
+    }
+
+    function ocultarInputAsunto() {
+        document.getElementById('formAgregarAsunto').classList.add('hidden');
+        document.getElementById('inputNuevoAsunto').value = "";
+    }
+
+    function guardarAsunto() {
+        const nuevoAsunto = document.getElementById('inputNuevoAsunto').value.trim();
+        if (!nuevoAsunto) return;
+
+        const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
+        if (plat) {
+            plat.asuntos.push(nuevoAsunto);
+            renderizarAsuntos(plat);
+            ocultarInputAsunto();
+        }
+    }
+
+    function eliminarAsunto(index) {
+        const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
+        if (plat) {
+            plat.asuntos.splice(index, 1);
+            renderizarAsuntos(plat);
+        }
+    }
+
+    function renderizarAsuntos(plat) {
+        const lista = document.getElementById('listaAsuntos');
+        lista.innerHTML = "";
+        if (plat.asuntos.length === 0) {
+            lista.innerHTML = "<p class='text-xs text-gray-500'>No hay asuntos configurados aún.</p>";
+            return;
+        }
+        plat.asuntos.forEach((asunto, index) => {
+            lista.innerHTML += `
+                <div class="flex items-center justify-between bg-[#0b132b] p-3 rounded-lg border border-gray-800 text-sm">
+                    <span class="text-gray-300">📄 ${asunto}</span>
+                    <button onclick="eliminarAsunto(${index})" class="text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Eliminar</button>
+                </div>
+            `;
+        });
     }
     </script>
 
