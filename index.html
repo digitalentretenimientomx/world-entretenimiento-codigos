@@ -1,14 +1,13 @@
-<!-- Ejemplo de la estructura en tu HTML -->
-<div class="card">
+<div class="card" style="padding: 20px; font-family: Arial, sans-serif;">
     <h3>Consultar Código de Verificación</h3>
-    <input type="email" id="inputCorreo" placeholder="Ingresa el correo a consultar" required>
-    <button onclick="realizarConsulta()">Consultar Código</button>
+    <input type="email" id="inputCorreo" placeholder="Ingresa el correo a consultar" style="padding: 8px; width: 250px; margin-right: 10px;" required>
+    <button onclick="realizarConsultaDirecta()" style="padding: 8px 15px; cursor: pointer;">Consultar Código</button>
     
     <div id="resultadoConsulta" style="margin-top: 15px; font-weight: bold;"></div>
 </div>
 
 <script>
-async function realizarConsulta() {
+async function realizarConsultaDirecta() {
     const correoInput = document.getElementById('inputCorreo').value.trim();
     const divResultado = document.getElementById('resultadoConsulta');
 
@@ -19,15 +18,11 @@ async function realizarConsulta() {
 
     divResultado.innerHTML = "Consultando código en el buzón...";
 
-    try {
-        const respuesta = await fetch('/api/consultar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ correo: correoInput })
-        });
+    // URL directa de tu Google Apps Script que ya probamos y responde correctamente
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3lmpp3cjfbqepZipEoJEjxjr76zTO-GcpqmOgQ5DytkFwkQsPjY7wp6rUEBNsf4Ek/exec';
 
+    try {
+        const respuesta = await fetch(`${GOOGLE_SCRIPT_URL}?correo=${encodeURIComponent(correoInput)}`);
         const resultado = await respuesta.json();
 
         if (resultado.success) {
