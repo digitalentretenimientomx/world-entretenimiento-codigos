@@ -1,0 +1,10 @@
+{
+  "name": "sistema-codigos",
+  "version": "1.0.0",
+  "description": "Sistema de consulta automatizada de codigos IMAP",
+  "main": "api/consultar.js",
+  "dependencies": {
+    "imap": "^0.8.19",
+    "mailparser": "^3.7.1"
+  }
+}
