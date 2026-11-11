@@ -194,7 +194,8 @@
 
     <!-- Script General -->
     <script>
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3lmpp3cjfbqepZipEoJEjxjr76zTO-GcpqmOgQ5DytkFwkQsPjY7wp6rUEBNsf4Ek/exec';
+    // Apunta directamente a la Serverless Function interna de Vercel
+    const API_URL = '/api/consultar';
 
     let plataformasData = [
         { id: 1, nombre: "CRUNCHYROLL", slug: "crunchyroll", activo: true, asuntos: ["Confirma tu nuevo inicio de sesión en Crunchyroll"] },
@@ -216,7 +217,7 @@
     }
     window.onload = actualizarSelectorPublico;
 
-    // Consulta con renderizado blindado del correo y fecha
+    // Consulta conectada a la Serverless Function de Vercel
     async function consultarCodigoPublico() {
         const correo = document.getElementById('inputCorreoPublico').value.trim();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value;
@@ -235,7 +236,7 @@
         contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando el correo más reciente...</div>";
 
         try {
-            const url = `${GOOGLE_SCRIPT_URL}?correo=${encodeURIComponent(correo)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`;
+            const url = `${API_URL}?correo=${encodeURIComponent(correo)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`;
             const respuesta = await fetch(url);
             const textoRespuesta = await respuesta.text();
             
@@ -243,10 +244,10 @@
             try {
                 resultado = JSON.parse(textoRespuesta);
             } catch (e) {
-                console.error("Respuesta cruda de Google:", textoRespuesta);
+                console.error("Respuesta cruda del servidor:", textoRespuesta);
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs overflow-x-auto'>
-                        <strong>Error de Google Apps Script:</strong><br>${textoRespuesta}
+                        <strong>Error del servidor:</strong><br>${textoRespuesta}
                     </div>
                 `;
                 return;
@@ -297,7 +298,7 @@
             console.error("Error de red:", error);
             contenedor.innerHTML = `
                 <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                    Error de red al conectar con Google Apps Script.
+                    Error de red al conectar con la API de Vercel.
                 </div>
             `;
         }
