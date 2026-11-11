@@ -192,7 +192,7 @@
         </main>
     </div>
 
-    <!-- Script General y Funciones -->
+    <!-- Script General -->
     <script>
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3lmpp3cjfbqepZipEoJEjxjr76zTO-GcpqmOgQ5DytkFwkQsPjY7wp6rUEBNsf4Ek/exec';
 
@@ -216,7 +216,7 @@
     }
     window.onload = actualizarSelectorPublico;
 
-    // Consulta con diagnóstico de errores y despliegue del correo
+    // Consulta con renderizado correcto del correo y fecha
     async function consultarCodigoPublico() {
         const correo = document.getElementById('inputCorreoPublico').value.trim();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value;
@@ -246,7 +246,7 @@
                 console.error("Respuesta cruda de Google:", textoRespuesta);
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs overflow-x-auto'>
-                        <strong>Error de Google Apps Script (No devolvió JSON):</strong><br>${textoRespuesta}
+                        <strong>Error de Google Apps Script:</strong><br>${textoRespuesta}
                     </div>
                 `;
                 return;
@@ -258,8 +258,8 @@
                         <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
                             <div>
                                 <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo encontrado!</span>
-                                <h3 class='text-white font-bold text-base mt-1'>${resultado.asunto}</h3>
-                                <p class='text-xs text-gray-400 mt-0.5'>Recibido: ${resultado.fecha}</p>
+                                <h3 class='text-white font-bold text-base mt-1'>${resultado.asunto || asuntoSeleccionado}</h3>
+                                <p class='text-xs text-gray-400 mt-0.5'>Recibido: ${resultado.fecha || 'Reciente'}</p>
                             </div>
                             <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
                                 ${resultado.codigo}
@@ -268,8 +268,8 @@
 
                         <div class='space-y-1.5'>
                             <label class='text-xs text-gray-400 font-medium'>Contenido del Correo:</label>
-                            <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed'>
-                                ${resultado.cuerpo}
+                            <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
+                                ${resultado.cuerpo || 'Sin contenido detallado'}
                             </div>
                         </div>
 
