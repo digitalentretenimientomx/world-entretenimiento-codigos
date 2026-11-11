@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ success: false, message: 'Faltan las credenciales IMAP en las variables de entorno de Vercel.' });
     }
 
-    const imap = new Imap({
+    const imapConfig = {
         user: user,
         password: password,
         host: process.env.IMAP_HOST || 'imap.gmail.com',
@@ -27,93 +27,96 @@ export default async function handler(req, res) {
         tlsOptions: { rejectUnauthorized: false },
         connTimeout: 15000,
         authTimeout: 15000
-    });
-
-    let finished = false;
-
-    const finalize = (status, data) => {
-        if (!finished) {
-            finished = true;
-            try { imap.end(); } catch (e) {}
-            if (!res.headersSent) {
-                res.status(status).json(data);
-            }
-        }
     };
 
-    imap.once('ready', () => {
-        imap.openBox('INBOX', true, (err, box) => {
-            if (err) {
-                return finalize(500, { success: false, message: 'No se pudo abrir la bandeja de entrada (INBOX).' });
-            }
+    return new Promise((resolve) => {
+        const imap = new Imap(imapConfig);
+        let finished = false;
 
-            // Buscar correos recientes
-            imap.search(['ALL'], (err, results) => {
-                if (err || !results || results.length === 0) {
-                    return finalize(200, { success: false, message: 'El buzón está vacío.' });
+        const finalize = (status, data) => {
+            if (!finished) {
+                finished = true;
+                try { imap.end(); } catch (e) {}
+                if (!res.headersSent) {
+                    res.status(status).json(data);
+                }
+                resolve();
+            }
+        };
+
+        imap.once('ready', () => {
+            imap.openBox('INBOX', true, (err, box) => {
+                if (err) {
+                    return finalize(500, { success: false, message: 'No se pudo abrir la bandeja de entrada.' });
                 }
 
-                const recentResults = results.slice(-15).reverse();
-                let fetchedCount = 0;
-                let encontrado = false;
+                imap.search(['ALL'], (err, results) => {
+                    if (err || !results || results.length === 0) {
+                        return finalize(200, { success: false, message: 'El buzón está vacío.' });
+                    }
 
-                const f = imap.fetch(recentResults, { bodies: '' });
+                    const recentResults = results.slice(-15).reverse();
+                    let fetchedCount = 0;
+                    let encontrado = false;
 
-                f.on('message', (msg) => {
-                    let mailBuffer = '';
-                    msg.on('body', (stream) => {
-                        stream.on('data', (chunk) => { mailBuffer += chunk.toString(); });
-                    });
+                    const f = imap.fetch(recentResults, { bodies: '' });
 
-                    msg.once('end', async () => {
-                        if (encontrado) return;
-                        try {
-                            const parsed = await simpleParser(mailBuffer);
-                            const subject = parsed.subject || '';
-                            const textBody = parsed.text || parsed.html || '';
+                    f.on('message', (msg) => {
+                        let mailBuffer = '';
+                        msg.on('body', (stream) => {
+                            stream.on('data', (chunk) => { mailBuffer += chunk.toString(); });
+                        });
 
-                            if (textBody.includes(correo) || subject.includes(correo)) {
-                                const codigoMatch = textBody.match(/\b\d{4,6}\b/);
-                                if (codigoMatch) {
-                                    encontrado = true;
-                                    return finalize(200, {
-                                        success: true,
-                                        codigo: codigoMatch[0],
-                                        asunto: subject,
-                                        tiempo: 'Reciente'
-                                    });
+                        msg.once('end', async () => {
+                            if (encontrado) return;
+                            try {
+                                const parsed = await simpleParser(mailBuffer);
+                                const subject = parsed.subject || '';
+                                const textBody = parsed.text || parsed.html || '';
+
+                                if (textBody.includes(correo) || subject.includes(correo)) {
+                                    const codigoMatch = textBody.match(/\b\d{4,6}\b/);
+                                    if (codigoMatch) {
+                                        encontrado = true;
+                                        return finalize(200, {
+                                            success: true,
+                                            codigo: codigoMatch[0],
+                                            asunto: subject,
+                                            tiempo: 'Reciente'
+                                        });
+                                    }
                                 }
+                            } catch (e) {
+                                console.error('Error parseando correo:', e);
                             }
-                        } catch (e) {
-                            console.error('Error procesando correo:', e);
-                        }
 
-                        fetchedCount++;
-                        if (fetchedCount >= recentResults.length && !encontrado) {
-                            finalize(200, { success: false, message: 'No se encontró ningún código reciente para este correo.' });
-                        }
+                            fetchedCount++;
+                            if (fetchedCount >= recentResults.length && !encontrado) {
+                                finalize(200, { success: false, message: 'No se encontró ningún código reciente para este correo.' });
+                            }
+                        });
                     });
-                });
 
-                f.once('error', () => {
-                    finalize(500, { success: false, message: 'Error al procesar los mensajes del buzón.' });
+                    f.once('error', () => {
+                        finalize(500, { success: false, message: 'Error al leer los mensajes del buzón.' });
+                    });
                 });
             });
         });
+
+        imap.once('error', (err) => {
+            console.error('Error IMAP:', err);
+            finalize(500, { success: false, message: 'Error de autenticación con Gmail. Revisa tus credenciales.' });
+        });
+
+        setTimeout(() => {
+            finalize(500, { success: false, message: 'Tiempo de espera agotado al conectar con el servidor.' });
+        }, 14000);
+
+        try {
+            imap.connect();
+        } catch (e) {
+            finalize(500, { success: false, message: 'Error al iniciar la conexión.' });
+        }
     });
-
-    imap.once('error', (err) => {
-        console.error('Error de conexión IMAP:', err);
-        finalize(500, { success: false, message: 'Error de autenticación con Gmail. Verifica tu usuario y contraseña de aplicación.' });
-    });
-
-    setTimeout(() => {
-        finalize(500, { success: false, message: 'Tiempo de espera agotado al conectar con el servidor de correo.' });
-    }, 14000);
-
-    try {
-        imap.connect();
-    } catch (e) {
-        finalize(500, { success: false, message: 'Error crítico al iniciar la conexión IMAP.' });
-    }
 }
