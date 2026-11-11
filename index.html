@@ -26,8 +26,8 @@
         </header>
 
         <main class="flex flex-col items-center justify-center px-4 my-auto">
-            <div class="w-full max-w-xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/60 rounded-2xl p-8 shadow-2xl text-center space-y-6">
-                <h2 class="text-xl font-bold tracking-wide text-white uppercase">BIENVENIDOS A TU PAGINA DE CODIGOS</h2>
+            <div class="w-full max-w-2xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/60 rounded-2xl p-8 shadow-2xl space-y-6">
+                <h2 class="text-xl font-bold tracking-wide text-white uppercase text-center">BIENVENIDOS A TU PAGINA DE CODIGOS</h2>
                 
                 <div class="space-y-4 text-left">
                     <div>
@@ -46,6 +46,8 @@
                         Buscar Email
                     </button>
                 </div>
+
+                <!-- Contenedor donde se despliega el correo y el código -->
                 <div id="resultadoPublico" class="text-left"></div>
             </div>
         </main>
@@ -111,7 +113,7 @@
                 </div>
                 <div>
                     <button onclick="cerrarAdmin()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-                        ← Volver a la página principal de códigos
+                        ← Volver al sitio principal
                     </button>
                 </div>
             </div>
@@ -202,7 +204,6 @@
 
     let plataformaEnEdicionId = null;
 
-    // Inicializar selector en la vista pública
     function actualizarSelectorPublico() {
         const select = document.getElementById('selectPlataformaPublica');
         select.innerHTML = "";
@@ -214,7 +215,7 @@
     }
     window.onload = actualizarSelectorPublico;
 
-    // Consulta con el asunto exacto seleccionado
+    // Consulta con renderizado completo del correo y código
     async function consultarCodigoPublico() {
         const correo = document.getElementById('inputCorreoPublico').value.trim();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value;
@@ -238,16 +239,40 @@
 
             if (resultado.success) {
                 contenedor.innerHTML = `
-                    <div class='p-4 mt-4 bg-green-500/10 border border-green-500/30 rounded-xl space-y-2'>
-                        <div class='text-green-400 font-bold text-sm'>¡Código más reciente encontrado!</div>
-                        <div class='text-white text-sm'><strong>Asunto:</strong> ${resultado.asunto}</div>
-                        <div class='text-yellow-300 text-xl font-bold tracking-wider'>Código: ${resultado.codigo}</div>
+                    <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl'>
+                        <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
+                            <div>
+                                <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo encontrado!</span>
+                                <h3 class='text-white font-bold text-base mt-1'>${resultado.asunto}</h3>
+                                <p class='text-xs text-gray-400 mt-0.5'>Recibido: ${resultado.fecha}</p>
+                            </div>
+                            <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
+                                ${resultado.codigo}
+                            </div>
+                        </div>
+
+                        <!-- Visor del cuerpo del correo -->
+                        <div class='space-y-1.5'>
+                            <label class='text-xs text-gray-400 font-medium'>Contenido del Correo:</label>
+                            <div class='w-full h-52 bg-white rounded-xl overflow-hidden border border-gray-700'>
+                                <iframe srcdoc="${resultado.cuerpo.replace(/"/g, '&quot;')}" class='w-full h-full border-0'></iframe>
+                            </div>
+                        </div>
+
+                        <div class='flex gap-3 pt-2'>
+                            <button onclick="navigator.clipboard.writeText('${resultado.codigo}'); alert('¡Código ${resultado.codigo} copiado al portapapeles!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
+                                Copiar Código (${resultado.codigo})
+                            </button>
+                            <button onclick="document.getElementById('resultadoPublico').innerHTML='';" class='bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm'>
+                                Nueva Consulta
+                            </button>
+                        </div>
                     </div>
                 `;
             } else {
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                        ${resultado.message || "No se encontró ningún código reciente."}
+                        ${resultado.message || "No se encontró ningún correo reciente."}
                     </div>
                 `;
             }
