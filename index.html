@@ -1,118 +1,47 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de Códigos - Verificación Instantánea</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+<!-- Ejemplo de la estructura en tu HTML -->
+<div class="card">
+    <h3>Consultar Código de Verificación</h3>
+    <input type="email" id="inputCorreo" placeholder="Ingresa el correo a consultar" required>
+    <button onclick="realizarConsulta()">Consultar Código</button>
+    
+    <div id="resultadoConsulta" style="margin-top: 15px; font-weight: bold;"></div>
+</div>
 
-    <!-- Header -->
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 p-2 rounded-lg text-white">
-                    <i class="fa-solid fa-shield-halved text-xl"></i>
-                </div>
-                <span class="font-bold text-lg tracking-wider">CODEX <span class="text-indigo-400">VERIFY</span></span>
-            </div>
-            <a href="/admin.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg transition">
-                <i class="fa-solid fa-gear mr-1"></i> Panel Admin
-            </a>
-        </div>
-    </header>
+<script>
+async function realizarConsulta() {
+    const correoInput = document.getElementById('inputCorreo').value.trim();
+    const divResultado = document.getElementById('resultadoConsulta');
 
-    <!-- Main Content -->
-    <main class="max-w-xl mx-auto px-4 py-12 flex-grow w-full">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-black mb-2 text-white">Consulta tu Código</h1>
-            <p class="text-slate-400 text-sm">Ingresa el correo electrónico asociado a tu cuenta para obtener el código de verificación más reciente.</p>
-        </div>
+    if (!correoInput) {
+        alert("Por favor, ingresa un correo.");
+        return;
+    }
 
-        <!-- Formulario de Consulta -->
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
-            <form id="searchForm" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Correo de la Cuenta</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
-                            <i class="fa-solid fa-envelope"></i>
-                        </span>
-                        <input type="email" id="correoConsulta" required placeholder="ejemplo@correo.com" 
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
-                    </div>
-                </div>
+    divResultado.innerHTML = "Consultando código en el buzón...";
 
-                <button type="submit" id="btnConsultar" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <span>Consultar Código</span>
-                </button>
-            </form>
-
-            <!-- Resultado -->
-            <div id="resultadoContainer" class="hidden mt-6 pt-6 border-t border-slate-800 text-center animate-fade-in">
-                <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold block mb-1">¡Código Encontrado!</span>
-                <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-4 my-3 flex items-center justify-between">
-                    <span id="codigoTexto" class="text-3xl font-mono font-black text-emerald-300 tracking-widest">------</span>
-                    <button onclick="copiarCodigo()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg text-xs transition">
-                        <i class="fa-regular fa-copy mr-1"></i> Copiar
-                    </button>
-                </div>
-                <p id="infoMensaje" class="text-xs text-slate-400 mt-2"></p>
-            </div>
-
-            <!-- Estado de Carga -->
-            <div id="loadingContainer" class="hidden mt-6 text-center py-6">
-                <div class="inline-block animate-spin rounded-full h-8 v-8 border-4 border-indigo-500 border-t-transparent"></div>
-                <p class="text-xs text-slate-400 mt-3">Buscando en el buzón de correo...</p>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
-        Sistema Automatizado de Recepción de Códigos &copy; 2026
-    </footer>
-
-    <script>
-        document.getElementById('searchForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const correo = document.getElementById('correoConsulta').value;
-            const resContainer = document.getElementById('resultadoContainer');
-            const loadContainer = document.getElementById('loadingContainer');
-            
-            resContainer.classList.add('hidden');
-            loadContainer.classList.remove('hidden');
-
-            try {
-                const response = await fetch('/api/consultar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ correo })
-                });
-                const data = await response.json();
-                
-                loadContainer.classList.add('hidden');
-                if(data.success) {
-                    document.getElementById('codigoTexto').innerText = data.codigo;
-                    document.getElementById('infoMensaje').innerText = `Asunto: ${data.asunto} (${data.tiempo})`;
-                    resContainer.classList.remove('hidden');
-                } else {
-                    alert(data.message || 'No se encontró ningún código reciente para este correo.');
-                }
-            } catch (error) {
-                loadContainer.classList.add('hidden');
-                alert('Error al conectar con el servidor de consulta.');
-            }
+    try {
+        const respuesta = await fetch('/api/consultar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ correo: correoInput })
         });
 
-        function copiarCodigo() {
-            const codigo = document.getElementById('codigoTexto').innerText;
-            navigator.clipboard.writeText(codigo);
-            alert('¡Código copiado al portapapeles!');
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            divResultado.innerHTML = `
+                <span style="color: green;">¡Código encontrado!</span><br>
+                <strong>Código:</strong> ${resultado.codigo}<br>
+                <strong>Asunto:</strong> ${resultado.asunto}
+            `;
+        } else {
+            divResultado.innerHTML = `<span style="color: red;">${resultado.message || "No se encontró ningún código."}</span>`;
         }
-    </script>
-</body>
-</html>
+    } catch (error) {
+        console.error("Error:", error);
+        divResultado.innerHTML = `<span style="color: red;">Error al conectar con el servidor de consulta.</span>`;
+    }
+}
+</script>
