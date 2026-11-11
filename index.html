@@ -192,7 +192,7 @@
         </main>
     </div>
 
-    <!-- Script General -->
+    <!-- Script General y Funciones -->
     <script>
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3lmpp3cjfbqepZipEoJEjxjr76zTO-GcpqmOgQ5DytkFwkQsPjY7wp6rUEBNsf4Ek/exec';
 
@@ -206,6 +206,7 @@
 
     function actualizarSelectorPublico() {
         const select = document.getElementById('selectPlataformaPublica');
+        if(!select) return;
         select.innerHTML = "";
         plataformasData.filter(p => p.activo).forEach(plat => {
             plat.asuntos.forEach(asunto => {
@@ -215,7 +216,7 @@
     }
     window.onload = actualizarSelectorPublico;
 
-    // Consulta con renderizado completo del correo y código
+    // Consulta con diagnóstico de errores y despliegue del correo
     async function consultarCodigoPublico() {
         const correo = document.getElementById('inputCorreoPublico').value.trim();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value;
@@ -234,8 +235,22 @@
         contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando el correo más reciente...</div>";
 
         try {
-            const respuesta = await fetch(`${GOOGLE_SCRIPT_URL}?correo=${encodeURIComponent(correo)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`);
-            const resultado = await respuesta.json();
+            const url = `${GOOGLE_SCRIPT_URL}?correo=${encodeURIComponent(correo)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`;
+            const respuesta = await fetch(url);
+            const textoRespuesta = await respuesta.text();
+            
+            let resultado;
+            try {
+                resultado = JSON.parse(textoRespuesta);
+            } catch (e) {
+                console.error("Respuesta cruda de Google:", textoRespuesta);
+                contenedor.innerHTML = `
+                    <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs overflow-x-auto'>
+                        <strong>Error de Google Apps Script (No devolvió JSON):</strong><br>${textoRespuesta}
+                    </div>
+                `;
+                return;
+            }
 
             if (resultado.success) {
                 contenedor.innerHTML = `
@@ -251,11 +266,10 @@
                             </div>
                         </div>
 
-                        <!-- Visor del cuerpo del correo -->
                         <div class='space-y-1.5'>
                             <label class='text-xs text-gray-400 font-medium'>Contenido del Correo:</label>
-                            <div class='w-full h-52 bg-white rounded-xl overflow-hidden border border-gray-700'>
-                                <iframe srcdoc="${resultado.cuerpo.replace(/"/g, '&quot;')}" class='w-full h-full border-0'></iframe>
+                            <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed'>
+                                ${resultado.cuerpo}
                             </div>
                         </div>
 
@@ -277,10 +291,10 @@
                 `;
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error de red:", error);
             contenedor.innerHTML = `
                 <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                    Error al conectar con el servidor de consulta.
+                    Error de red al conectar con Google Apps Script.
                 </div>
             `;
         }
