@@ -42,7 +42,7 @@
                         <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <button onclick="ejecutarBusquedaMatriz()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                    <button onclick="ejecutarBusquedaMatrizEstricta()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
                         Buscar el Último Código Recibido
                     </button>
                 </div>
@@ -139,7 +139,7 @@
         </main>
     </div>
 
-    <!-- Script General Funcional -->
+    <!-- Script General con Filtro Estricto Exacto -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
 
@@ -173,7 +173,7 @@
         if(inputMatriz) inputMatriz.value = CORREO_MATRIZ_OFICIAL;
     };
 
-    function ejecutarBusquedaMatriz() {
+    function ejecutarBusquedaMatrizEstricta() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim();
         const contenedor = document.getElementById('resultadoPublico');
@@ -188,7 +188,7 @@
             return;
         }
 
-        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL}</b> el correo de <b>${correoCliente}</b> filtrado por asunto y ordenado por la hora más reciente...</div>`;
+        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL}</b> el correo de <b>${correoCliente}</b> con filtro estricto por asunto...</div>`;
 
         setTimeout(() => {
             let bandejaMatriz = JSON.parse(localStorage.getItem('world_matriz_correos'));
@@ -200,7 +200,12 @@
                 localStorage.setItem('world_matriz_correos', JSON.stringify(bandejaMatriz));
             }
 
-            const existe = bandejaMatriz.some(item => item.matriz.toLowerCase() === CORREO_MATRIZ_OFICIAL && item.correo.toLowerCase() === correoCliente && item.asunto.toLowerCase() === asuntoSeleccionado.toLowerCase());
+            // Validar existencia de prueba para este correo y asunto exacto
+            const existe = bandejaMatriz.some(item => 
+                item.matriz.toLowerCase() === CORREO_MATRIZ_OFICIAL && 
+                item.correo.toLowerCase() === correoCliente && 
+                item.asunto.toLowerCase() === asuntoSeleccionado.toLowerCase()
+            );
             
             if (!existe) {
                 bandejaMatriz.push({
@@ -214,22 +219,24 @@
                 localStorage.setItem('world_matriz_correos', JSON.stringify(bandejaMatriz));
             }
 
+            // FILTRADO ESTRICTO Y EXACTO (Matriz + Correo Cliente + Asunto exacto)
             const filtrados = bandejaMatriz.filter(item => {
-                const matchMatriz = item.matriz.trim().toLowerCase() === CORREO_MATRIZ_OFICIAL;
+                const matchMatriz = item.matriz.trim().toLowerCase() === CORREO_MATRIZ_OFICIAL.toLowerCase();
                 const matchCorreo = item.correo.trim().toLowerCase() === correoCliente;
-                const matchAsunto = item.asunto.trim().toLowerCase().includes(asuntoSeleccionado.toLowerCase()) || asuntoSeleccionado.toLowerCase().includes(item.asunto.trim().toLowerCase());
+                const matchAsunto = item.asunto.trim().toLowerCase() === asuntoSeleccionado.trim().toLowerCase();
                 return matchMatriz && matchCorreo && matchAsunto;
             });
 
             if (filtrados.length === 0) {
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                        No se encontró ningún correo en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con este asunto.
+                        No se encontró ningún correo en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con el asunto exacto seleccionado.
                     </div>
                 `;
                 return;
             }
 
+            // ORDENAMIENTO ESTRICTO POR HORA Y FECHA (Descendente: el más reciente primero)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
             const ultimoCorreo = filtrados[0];
 
@@ -250,7 +257,7 @@
                     <div class='space-y-1.5'>
                         <label class='text-xs text-gray-400 font-medium'>Detalle del Registro:</label>
                         <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            Se ha localizado el mensaje más reciente ingresado en la bandeja matriz oficial ${CORREO_MATRIZ_OFICIAL} para el cliente ${ultimoCorreo.correo}.
+                            Se ha localizado el mensaje más reciente ingresado en la bandeja matriz oficial ${CORREO_MATRIZ_OFICIAL} para el cliente ${ultimoCorreo.correo} bajo el filtro exacto de asunto.
                         </div>
                     </div>
 
