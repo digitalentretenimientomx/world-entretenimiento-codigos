@@ -42,12 +42,12 @@
                         <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <button onclick="buscarUltimoCodigoReal()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
-                        Buscar el Último Código Recibido
+                    <button onclick="filtrarYAbrirUltimoCorreo()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                        Buscar y Abrir el Último Correo Filtrado
                     </button>
                 </div>
 
-                <!-- Contenedor donde se despliega el resultado -->
+                <!-- Contenedor donde se despliega el resultado exacto -->
                 <div id="resultadoPublico" class="text-left"></div>
             </div>
         </main>
@@ -136,9 +136,9 @@
                 </div>
                 <div class="pt-4 border-t border-gray-700 space-y-2">
                     <h2 class="text-sm font-bold text-white">Registrador de Entradas a la Matriz</h2>
-                    <p class="text-xs text-gray-400">Registra aquí los correos reales que van llegando a `codigosworld@gmail.com` para que la página pública los busque y ordene por hora:</p>
-                    <input type="text" id="simCorreo" placeholder="Correo del cliente (ej: cliente@gmail.com)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
-                    <input type="text" id="simAsunto" placeholder="Asunto exacto de la plataforma" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
+                    <p class="text-xs text-gray-400">Registra aquí los correos reales que van llegando a <code>codigosworld@gmail.com</code>:</p>
+                    <input type="text" id="simCorreo" placeholder="Correo del cliente (ej: danae0973904@gmail.com)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
+                    <input type="text" id="simAsunto" placeholder="Asunto exacto (ej: Tu código de acceso único para Disney+)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
                     <input type="text" id="simCodigo" placeholder="Código recibido (ej: 482910)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
                     <button onclick="agregarCorreoRealMatriz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Guardar Registro en Matriz</button>
                 </div>
@@ -146,7 +146,7 @@
         </main>
     </div>
 
-    <!-- Script General sin Datos de Prueba Falsos -->
+    <!-- Script Definitivo con Limpieza de Caché Automática y Filtrado Estricto del Último Correo -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
 
@@ -175,11 +175,16 @@
     }
 
     window.onload = () => {
+        // Limpieza automática de versiones anteriores de caché defectuosas para evitar datos viejos
+        if (localStorage.getItem('world_version_limpieza') !== 'v3') {
+            localStorage.removeItem('world_matriz_correos');
+            localStorage.setItem('world_version_limpieza', 'v3');
+        }
+
         actualizarSelectorPublico();
         const inputMatriz = document.getElementById('inputCorreoMatrizConfig');
         if(inputMatriz) inputMatriz.value = CORREO_MATRIZ_OFICIAL;
 
-        // Si no existe la base de datos local, se inicia completamente vacía (sin datos falsos)
         if (!localStorage.getItem('world_matriz_correos')) {
             localStorage.setItem('world_matriz_correos', JSON.stringify([]));
         }
@@ -202,19 +207,19 @@
             asunto: a,
             codigo: cod,
             fechaHora: new Date().toLocaleString(),
-            timestamp: new Date().getTime() // Marca temporal real para el ordenamiento
+            timestamp: new Date().getTime() // Marca temporal exacta para ordenamiento
         });
 
         localStorage.setItem('world_matriz_correos', JSON.stringify(bandeja));
-        alert("¡Correo registrado correctamente en la matriz con fecha y hora actual!");
+        alert("¡Correo registrado con éxito en la matriz con la hora actual!");
         document.getElementById('simCorreo').value = "";
         document.getElementById('simAsunto').value = "";
         document.getElementById('simCodigo').value = "";
     }
 
-    function buscarUltimoCodigoReal() {
+    function filtrarYAbrirUltimoCorreo() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
-        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim();
+        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim().toLowerCase();
         const contenedor = document.getElementById('resultadoPublico');
 
         if (!correoCliente) {
@@ -227,12 +232,12 @@
             return;
         }
 
-        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL}</b> el correo de <b>${correoCliente}</b>...</div>`;
+        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL}</b> el último correo de <b>${correoCliente}</b>...</div>`;
 
         setTimeout(() => {
             const bandejaMatriz = JSON.parse(localStorage.getItem('world_matriz_correos')) || [];
 
-            // Filtrado estricto cruzando Matriz, Correo del cliente y Asunto exacto
+            // FILTRADO ESTRICTO: Matriz oficial + Correo del cliente exacto + Asunto exacto
             const filtrados = bandejaMatriz.filter(item => {
                 const matrizItem = (item.matriz || "").trim().toLowerCase();
                 const correoItem = (item.correo || "").trim().toLowerCase();
@@ -240,7 +245,7 @@
 
                 const matchMatriz = matrizItem === CORREO_MATRIZ_OFICIAL.toLowerCase();
                 const matchCorreo = correoItem === correoCliente;
-                const matchAsunto = asuntoItem === asuntoSeleccionado.toLowerCase() || asuntoItem.includes(asuntoSeleccionado.toLowerCase());
+                const matchAsunto = asuntoItem === asuntoSeleccionado || asuntoItem.includes(asuntoSeleccionado);
 
                 return matchMatriz && matchCorreo && matchAsunto;
             });
@@ -248,8 +253,8 @@
             if (filtrados.length === 0) {
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                        No se encontró ningún correo registrado en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con este asunto.<br>
-                        <span class='text-xs text-gray-400 mt-1 block'>(Ve al Panel Admin -> Correo Matriz y Registros para registrar el correo real y su código).</span>
+                        No se encontró ningún correo en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con este asunto.<br>
+                        <span class='text-xs text-gray-400 mt-1 block'>(Ve al Panel Admin -> Correo Matriz y Registros para dar de alta el correo y su código).</span>
                     </div>
                 `;
                 return;
@@ -257,32 +262,35 @@
 
             // ORDENAMIENTO CRONOLÓGICO ESTRICTO: Del más nuevo al más antiguo (timestamp descendente)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
-            const ultimoCorreo = filtrados[0]; // Tomamos exclusivamente el último que llegó
+            
+            // TOMAR ESTRICTAMENTE EL ÚLTIMO CORREO FILTRADO (El más reciente en hora y fecha)
+            const ultimoCorreoFiltrado = filtrados[0];
 
+            // Renderizar y abrir el resultado del último correo filtrado
             contenedor.innerHTML = `
-                <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl'>
+                <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl animate-fade-in'>
                     <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
                         <div>
-                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo recibido en Matriz!</span>
-                            <h3 class='text-white font-bold text-base mt-1'>${ultimoCorreo.asunto}</h3>
-                            <p class='text-xs text-gray-400 mt-0.5'>Matriz: <strong>${CORREO_MATRIZ_OFICIAL}</strong> → Cliente: ${ultimoCorreo.correo}</p>
-                            <p class='text-xs text-yellow-400 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${ultimoCorreo.fechaHora}</p>
+                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo filtrado abierto con éxito!</span>
+                            <h3 class='text-white font-bold text-base mt-1'>${ultimoCorreoFiltrado.asunto}</h3>
+                            <p class='text-xs text-gray-400 mt-0.5'>Matriz: <strong>${CORREO_MATRIZ_OFICIAL}</strong> → Cliente: ${ultimoCorreoFiltrado.correo}</p>
+                            <p class='text-xs text-yellow-400 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${ultimoCorreoFiltrado.fechaHora}</p>
                         </div>
                         <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
-                            ${ultimoCorreo.codigo}
+                            ${ultimoCorreoFiltrado.codigo}
                         </div>
                     </div>
 
                     <div class='space-y-1.5'>
-                        <label class='text-xs text-gray-400 font-medium'>Detalle del Registro:</label>
+                        <label class='text-xs text-gray-400 font-medium'>Contenido del Último Correo:</label>
                         <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            Se ha localizado el mensaje más reciente ingresado en la bandeja matriz oficial ${CORREO_MATRIZ_OFICIAL} para el cliente ${ultimoCorreo.correo}.
+                            Estimado usuario, este es el mensaje más reciente recibido en ${CORREO_MATRIZ_OFICIAL} para ${ultimoCorreoFiltrado.correo}. Su código de verificación correspondiente es: ${ultimoCorreoFiltrado.codigo}.
                         </div>
                     </div>
 
                     <div class='flex gap-3 pt-2'>
-                        <button onclick="navigator.clipboard.writeText('${ultimoCorreo.codigo}'); alert('¡Código ${ultimoCorreo.codigo} copiado!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
-                            Copiar Código (${ultimoCorreo.codigo})
+                        <button onclick="navigator.clipboard.writeText('${ultimoCorreoFiltrado.codigo}'); alert('¡Código ${ultimoCorreoFiltrado.codigo} copiado!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
+                            Copiar Código (${ultimoCorreoFiltrado.codigo})
                         </button>
                         <button onclick="document.getElementById('resultadoPublico').innerHTML='';" class='bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm'>
                             Nueva Consulta
