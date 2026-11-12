@@ -25,7 +25,7 @@
         </button>
     </header>
 
-    <!-- WIDGET DE CONSULTA DIRECTA AL CORREO MATRIZ -->
+    <!-- WIDGET DE CONSULTA -->
     <main class="relative z-10 flex flex-col items-center justify-center px-4 my-auto">
         <div class="w-full max-w-xl bg-[#1c2541]/95 backdrop-blur-md border border-gray-700/80 rounded-2xl p-8 shadow-2xl space-y-6">
             
@@ -53,18 +53,16 @@
                 </button>
             </div>
 
-            <!-- Loader de consulta en vivo -->
             <div id="loader-box" class="hidden text-center py-6">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#ff6600] border-t-transparent"></div>
                 <p class="text-xs text-gray-400 mt-2">Buscando código en el sistema...</p>
             </div>
 
-            <!-- Contenedor de Resultados -->
             <div id="email-checker-message" class="text-left"></div>
         </div>
     </main>
 
-    <!-- POPUP DE RESULTADO (Limpio, sin mostrar correos) -->
+    <!-- POPUP DE RESULTADO -->
     <div id="zmc-popup-overlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-[#1c2541] border border-[#ff6600]/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
             <button onclick="cerrarPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
@@ -106,7 +104,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE LOGIN PARA EL PANEL ADMIN -->
+    <!-- MODAL DE LOGIN ADMIN -->
     <div id="modalLoginAdmin" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-[#1c2541] border border-[#ff6600]/60 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 relative">
             <button onclick="cerrarLoginAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
@@ -157,12 +155,11 @@
 
         <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8 space-y-6">
             
-            <!-- SECCIÓN: PLATAFORMAS Y ASUNTOS -->
             <div id="seccionAdminPlataformas" class="space-y-6">
                 <header class="flex justify-between items-center bg-[#1c2541] p-4 rounded-xl border border-gray-800">
                     <div>
                         <h1 class="text-lg font-bold text-[#ff6600]">Gestión de Plataformas y Asuntos</h1>
-                        <p class="text-xs text-gray-400">Define los asuntos que el sistema buscará en el correo matriz</p>
+                        <p class="text-xs text-gray-400">Sincronizado globalmente en la nube</p>
                     </div>
                     <button onclick="abrirNuevaPlataforma()" class="bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
                         + Nueva Plataforma
@@ -207,7 +204,6 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: CONFIGURACIÓN DE URL DE CONEXIÓN AL CORREO MATRIZ -->
             <div id="seccionAdminConfig" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
                 <h1 class="text-lg font-bold text-[#ff6600]">Conexión con el Correo Matriz (API / Webhook)</h1>
                 <p class="text-xs text-gray-400">Correo matriz configurado: <strong class="text-[#ff6600]">codigosworld@gmail.com</strong></p>
@@ -216,30 +212,59 @@
                     <input type="text" id="inputWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6600]">
                 </div>
                 <button onclick="guardarWebhookUrl()" class="bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold px-5 py-2.5 rounded-lg text-xs transition">Guardar URL de Conexión</button>
-                <p class="text-xs text-gray-500 mt-2">Esta URL se encarga de consultar en tiempo real la bandeja de entrada de <code>codigosworld@gmail.com</code> sin necesidad de registrar códigos manualmente.</p>
             </div>
         </main>
     </div>
 
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- SCRIPT PRINCIPAL CON SINCRONIZACIÓN CLOUD -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
-    
-    // CREDENCIALES DEL PANEL ADMIN (Puedes cambiarlas aquí cuando gustes)
     const ADMIN_CORREO_VALIDO = "codigosworld@gmail.com";
-    const ADMIN_PASS_VALIDO = "World2026*"; // Cambia esta contraseña por la que prefieras
+    const ADMIN_PASS_VALIDO = "World2026*";
 
-    let plataformasData = JSON.parse(localStorage.getItem('world_plat_data')) || [
-        { id: 1, nombre: "DISNEY+", asuntos: ["Tu código de acceso único para Disney+"] },
-        { id: 2, nombre: "NETFLIX", asuntos: ["Tu código de acceso temporal de Netflix"] },
-        { id: 3, nombre: "MAX", asuntos: ["Tu código de verificación de Max"] }
-    ];
-
+    let plataformasData = [];
     let plataformaEnEdicionId = null;
 
-    function guardarEnStorage() {
-        localStorage.setItem('world_plat_data', JSON.stringify(plataformasData));
-        actualizarSelectorPublico();
+    // Cargar plataformas desde Google Apps Script al iniciar
+    function cargarPlataformasCloud() {
+        const webhookUrl = localStorage.getItem('world_webhook_url');
+        if (!webhookUrl) {
+            plataformasData = [
+                { id: 1, nombre: "DISNEY+", asuntos: ["Tu código de acceso único para Disney+"] },
+                { id: 2, nombre: "NETFLIX", asuntos: ["Tu código de acceso temporal de Netflix"] },
+                { id: 3, nombre: "MAX", asuntos: ["Tu código de verificación de Max"] }
+            ];
+            actualizarSelectorPublico();
+            return;
+        }
+
+        fetch(`${webhookUrl}?action=obtenerPlataformas`, { method: 'GET', mode: 'cors' })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    plataformasData = data;
+                    actualizarSelectorPublico();
+                }
+            })
+            .catch(err => console.error("Error cargando plataformas:", err));
+    }
+
+    // Guardar plataformas en la nube de Google Apps Script
+    function sincronizarPlataformasCloud() {
+        const webhookUrl = localStorage.getItem('world_webhook_url');
+        if (!webhookUrl) {
+            actualizarSelectorPublico();
+            return;
+        }
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plataformas: plataformasData })
+        }).then(() => {
+            actualizarSelectorPublico();
+        }).catch(err => console.error("Error sincronizando:", err));
     }
 
     function actualizarSelectorPublico() {
@@ -254,19 +279,19 @@
     }
 
     window.onload = () => {
-        actualizarSelectorPublico();
         const savedUrl = localStorage.getItem('world_webhook_url') || "";
         const inputUrl = document.getElementById('inputWebhookUrl');
         if(inputUrl) inputUrl.value = savedUrl;
+        cargarPlataformasCloud();
     };
 
     function guardarWebhookUrl() {
         const url = document.getElementById('inputWebhookUrl').value.trim();
         localStorage.setItem('world_webhook_url', url);
-        alert("¡URL de conexión guardada correctamente!");
+        alert("¡URL de conexión guardada correctamente! Sincronizando...");
+        cargarPlataformasCloud();
     }
 
-    // CONTROL DE ACCESO AL PANEL ADMIN
     function intentarAbrirAdmin() {
         document.getElementById('modalLoginAdmin').classList.remove('hidden');
     }
@@ -284,6 +309,7 @@
             document.getElementById('inputAdminEmail').value = "";
             document.getElementById('inputAdminPass').value = "";
             document.getElementById('vistaAdmin').classList.remove('hidden');
+            cargarPlataformasCloud();
             cambiarSeccionAdmin('plataformas');
         } else {
             alert("Acceso denegado. Correo o contraseña incorrectos.");
@@ -297,23 +323,11 @@
         const messageBox = document.getElementById('email-checker-message');
         const webhookUrl = localStorage.getItem('world_webhook_url');
 
-        if (!correoCliente) {
-            alert("Por favor, ingresa el correo del cliente.");
-            return;
-        }
-
-        if (!asuntoSeleccionado) {
-            alert("Por favor, selecciona un asunto de plataforma válido.");
-            return;
-        }
+        if (!correoCliente) { alert("Por favor, ingresa el correo del cliente."); return; }
+        if (!asuntoSeleccionado) { alert("Por favor, selecciona un asunto válido."); return; }
 
         if (!webhookUrl) {
-            messageBox.innerHTML = `
-                <div class='p-4 mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-xs space-y-2'>
-                    <p class='font-bold'>⚠️ Falta configurar la conexión al correo matriz.</p>
-                    <p>Para buscar en <strong>${CORREO_MATRIZ_OFICIAL}</strong> en tiempo real, ve al <strong>Panel Admin -> Configurar Webhook / API</strong> e ingresa la URL de tu conector.</p>
-                </div>
-            `;
+            messageBox.innerHTML = `<div class='p-4 mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-xs'>⚠️ Configura la URL del Webhook en el Panel Admin.</div>`;
             return;
         }
 
@@ -326,29 +340,15 @@
             .then(response => response.json())
             .then(data => {
                 loaderBox.classList.add('hidden');
-                
                 if (data.encontrado && data.codigo) {
-                    abrirPopupResultado({
-                        asunto: asuntoSeleccionado,
-                        codigo: data.codigo,
-                        fechaHora: data.fechaHora || new Date().toLocaleString()
-                    });
+                    abrirPopupResultado({ asunto: asuntoSeleccionado, codigo: data.codigo, fechaHora: data.fechaHora || new Date().toLocaleString() });
                 } else {
-                    messageBox.innerHTML = `
-                        <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs space-y-1'>
-                            <p class='font-bold'>No se encontró ningún correo reciente en la matriz.</p>
-                            <p class='text-[10px] text-gray-400'>${data.debug || 'Verifica que el correo del cliente y el asunto coincidan con un mensaje real recibido en ${CORREO_MATRIZ_OFICIAL}.'}</p>
-                        </div>
-                    `;
+                    messageBox.innerHTML = `<div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs'>No se encontró ningún correo reciente en la matriz.</div>`;
                 }
             })
-            .catch(error => {
+            .catch(() => {
                 loaderBox.classList.add('hidden');
-                messageBox.innerHTML = `
-                    <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs text-center'>
-                        Error al conectar con la bandeja matriz de Gmail. Verifica que la URL del Apps Script esté publicada para "Cualquiera".
-                    </div>
-                `;
+                messageBox.innerHTML = `<div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs text-center'>Error de conexión con Google Apps Script.</div>`;
             });
     }
 
@@ -366,14 +366,8 @@
         document.getElementById('zmc-popup-overlay').classList.remove('hidden');
     }
 
-    function cerrarPopup() {
-        document.getElementById('zmc-popup-overlay').classList.add('hidden');
-    }
-
-    function cerrarAdmin() { 
-        document.getElementById('vistaAdmin').classList.add('hidden'); 
-        actualizarSelectorPublico(); 
-    }
+    function cerrarPopup() { document.getElementById('zmc-popup-overlay').classList.add('hidden'); }
+    function cerrarAdmin() { document.getElementById('vistaAdmin').classList.add('hidden'); cargarPlataformasCloud(); }
 
     function cambiarSeccionAdmin(seccion) {
         document.getElementById('seccionAdminPlataformas').classList.add('hidden');
@@ -438,25 +432,25 @@
 
     function guardarPlataforma() {
         const nombre = document.getElementById('inputNombrePlat').value.trim();
-        if (!nombre) { alert("Ingresa el nombre de la plataforma."); return; }
+        if (!nombre) { alert("Ingresa el nombre."); return; }
 
         if (plataformaEnEdicionId === null) {
             const nueva = { id: Date.now(), nombre, asuntos: [] };
             plataformasData.push(nueva);
-            guardarEnStorage();
+            sincronizarPlataformasCloud();
             editarPlataforma(nueva.id);
         } else {
             const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
             if (plat) { plat.nombre = nombre; }
-            guardarEnStorage();
+            sincronizarPlataformasCloud();
             cancelarEdicion();
         }
     }
 
     function eliminarPlataforma(id) {
-        if (confirm("¿Estás seguro de eliminar esta plataforma?")) {
+        if (confirm("¿Seguro de eliminar esta plataforma?")) {
             plataformasData = plataformasData.filter(p => p.id !== id);
-            guardarEnStorage();
+            sincronizarPlataformasCloud();
             renderizarTablaPlataformas();
         }
     }
@@ -470,7 +464,7 @@
         const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
         if (plat) {
             plat.asuntos.push(nuevoAsunto);
-            guardarEnStorage();
+            sincronizarPlataformasCloud();
             renderizarAsuntosAdmin(plat);
             document.getElementById('inputNuevoAsunto').value = "";
             document.getElementById('formAgregarAsunto').classList.add('hidden');
@@ -481,7 +475,7 @@
         const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
         if (plat) {
             plat.asuntos.splice(index, 1);
-            guardarEnStorage();
+            sincronizarPlataformasCloud();
             renderizarAsuntosAdmin(plat);
         }
     }
