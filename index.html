@@ -147,7 +147,6 @@
                 </div>
                 <nav class="mt-6 space-y-1 px-4 text-sm">
                     <a href="#" onclick="cambiarSeccionAdmin('plataformas')" id="navPlataformas" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Plataformas y Asuntos</a>
-                    <a href="#" onclick="cambiarSeccionAdmin('configuracion')" id="navConfig" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Configurar Webhook / API</a>
                     <a href="#" onclick="cerrarAdmin()" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">← Volver al sitio público</a>
                 </nav>
             </div>
@@ -205,21 +204,14 @@
                     </div>
                 </div>
             </div>
-
-            <div id="seccionAdminConfig" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
-                <h1 class="text-lg font-bold text-[#ff6600]">Conexión con el Correo Matriz (API / Webhook)</h1>
-                <p class="text-xs text-gray-400">Correo matriz: <strong class="text-[#ff6600]">codigosworld@gmail.com</strong></p>
-                <div>
-                    <label class="text-xs text-gray-400 block mb-1">URL del Script:</label>
-                    <input type="text" id="inputWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6600]">
-                </div>
-                <button onclick="guardarWebhookUrl()" class="bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold px-5 py-2.5 rounded-lg text-xs transition">Guardar URL de Conexión</button>
-            </div>
         </main>
     </div>
 
     <!-- SCRIPT PRINCIPAL -->
     <script>
+    // URL FIJA DEL WEBHOOK INTEGRADA DE FÁBRICA
+    const WEBHOOK_URL_FIJA = "https://script.google.com/macros/s/AKfycby3XxxRaZy78PT_EQhhoY_btuB1MQHld_YqIlpTbWbyF_jlpn-59JdU7jyI2Q8N7JCg/exec";
+
     const ADMIN_CORREO_VALIDO = "codigosworld@gmail.com";
     const ADMIN_PASS_VALIDO = "World2026*";
 
@@ -227,19 +219,7 @@
     let plataformaEnEdicionId = null;
 
     function cargarPlataformasCloud(mostrarAlerta = false) {
-        const webhookUrl = localStorage.getItem('world_webhook_url');
-        if (!webhookUrl) {
-            plataformasData = [
-                { id: 1, nombre: "DISNEY+", asuntos: ["Tu código de acceso único para Disney+"] },
-                { id: 2, nombre: "NETFLIX", asuntos: ["Tu código de acceso temporal de Netflix"] },
-                { id: 3, nombre: "MAX", asuntos: ["Tu código de verificación de Max"] }
-            ];
-            actualizarSelectorPublico();
-            if(mostrarAlerta) alert("⚠️ Configura primero la URL del Webhook en el Panel Admin.");
-            return;
-        }
-
-        fetch(`${webhookUrl}?action=obtenerPlataformas&t=${Date.now()}`, { method: 'GET', mode: 'cors' })
+        fetch(`${WEBHOOK_URL_FIJA}?action=obtenerPlataformas&t=${Date.now()}`, { method: 'GET', mode: 'cors' })
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -255,12 +235,9 @@
     }
 
     function sincronizarPlataformasCloud() {
-        const webhookUrl = localStorage.getItem('world_webhook_url');
-        if (!webhookUrl) return;
-
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = webhookUrl;
+        form.action = WEBHOOK_URL_FIJA;
         form.target = 'hidden_iframe';
 
         const input = document.createElement('input');
@@ -297,18 +274,8 @@
     }
 
     window.onload = () => {
-        const storedUrl = localStorage.getItem('world_webhook_url') || "";
-        const inputUrl = document.getElementById('inputWebhookUrl');
-        if(inputUrl) inputUrl.value = storedUrl;
         cargarPlataformasCloud();
     };
-
-    function guardarWebhookUrl() {
-        const url = document.getElementById('inputWebhookUrl').value.trim();
-        localStorage.setItem('world_webhook_url', url);
-        alert("¡URL guardada correctamente! Sincronizando...");
-        cargarPlataformasCloud(true);
-    }
 
     function intentarAbrirAdmin() { 
         document.getElementById('modalLoginAdmin').classList.remove('hidden'); 
@@ -339,16 +306,14 @@
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim();
         const loaderBox = document.getElementById('loader-box');
         const messageBox = document.getElementById('email-checker-message');
-        const webhookUrl = localStorage.getItem('world_webhook_url');
 
         if (!correoCliente) { alert("Ingresa el correo del cliente."); return; }
         if (!asuntoSeleccionado) { alert("Selecciona un asunto válido."); return; }
-        if (!webhookUrl) { messageBox.innerHTML = `<div class='p-4 mt-4 bg-yellow-500/10 rounded-xl text-yellow-400 text-xs'>⚠️ Configura la URL del Webhook en el Panel Admin.</div>`; return; }
 
         loaderBox.classList.remove('hidden');
         messageBox.innerHTML = "";
 
-        fetch(`${webhookUrl}?correo=${encodeURIComponent(correoCliente)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`, { method: 'GET', mode: 'cors' })
+        fetch(`${WEBHOOK_URL_FIJA}?correo=${encodeURIComponent(correoCliente)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`, { method: 'GET', mode: 'cors' })
             .then(res => res.json())
             .then(data => {
                 loaderBox.classList.add('hidden');
@@ -380,18 +345,8 @@
 
     function cambiarSeccionAdmin(seccion) {
         document.getElementById('seccionAdminPlataformas').classList.add('hidden');
-        document.getElementById('seccionAdminConfig').classList.add('hidden');
-        document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition";
-        document.getElementById('navConfig').className = "flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition";
-
-        if (seccion === 'plataformas') {
-            document.getElementById('seccionAdminPlataformas').classList.remove('hidden');
-            document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
-            renderizarTablaPlataformas();
-        } else if (seccion === 'configuracion') {
-            document.getElementById('seccionAdminConfig').classList.remove('hidden');
-            document.getElementById('navConfig').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
-        }
+        document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
+        renderizarTablaPlataformas();
     }
 
     function renderizarTablaPlataformas() {
