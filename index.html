@@ -3,59 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODE CODEX - Panel de Consultas y Matriz</title>
+    <title>CODE CODEX - Validador de Códigos Matriz</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0b132b] text-white font-sans antialiased min-h-screen relative overflow-x-hidden">
+<body class="bg-[#0b132b] text-white font-sans antialiased min-h-screen relative overflow-x-hidden flex flex-col justify-between">
 
-    <!-- Fondo Matrix sutil -->
+    <!-- Fondo Matrix sutil de ambientación -->
     <div class="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden flex justify-around text-xs font-mono text-yellow-500">
         <div>2026 8735 9941 1029 4432<br>0192 8374 5561 2234 9980</div>
         <div>5541 2234 9980 2026 8735<br>9941 1029 4432 0192 8374</div>
     </div>
 
-    <!-- PÁGINA PÚBLICA DE CÓDIGOS -->
-    <div id="vistaPublica" class="relative z-10 flex flex-col min-h-screen justify-between">
-        <header class="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto w-full">
-            <div class="text-xl font-bold tracking-wider text-yellow-400 flex items-center gap-1">
-                CODE<span class="text-white">CODEX</span>
-            </div>
-            <button onclick="abrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-yellow-400 px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
-                <span>🔑</span> Panel Admin
-            </button>
-        </header>
+    <!-- HEADER / NAVEGACIÓN -->
+    <header class="relative z-10 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto w-full">
+        <div class="text-xl font-bold tracking-wider text-yellow-400 flex items-center gap-1">
+            CODE<span class="text-white">CODEX</span>
+        </div>
+        <button onclick="abrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-yellow-400 px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
+            <span>🔑</span> Panel Admin
+        </button>
+    </header>
 
-        <main class="flex flex-col items-center justify-center px-4 my-auto">
-            <div class="w-full max-w-2xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/60 rounded-2xl p-8 shadow-2xl space-y-6">
-                <h2 class="text-xl font-bold tracking-wide text-white uppercase text-center">CONSULTA DE CÓDIGOS — BANDEJA MATRIZ</h2>
-                
-                <div class="space-y-4 text-left">
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Selecciona la plataforma (Asunto configurado):</label>
-                        <select id="selectPlataformaPublica" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-yellow-400">
-                            <!-- Se llena dinámicamente -->
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Correo del cliente a consultar:</label>
-                        <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
-                    </div>
-
-                    <button onclick="filtrarYAbrirUltimoCorreo()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
-                        Buscar y Abrir el Último Correo Filtrado
-                    </button>
+    <!-- WIDGET PRINCIPAL (Inspirado en la estructura modular de la referencia) -->
+    <main class="relative z-10 flex flex-col items-center justify-center px-4 my-auto">
+        <div id="zmc-wrapper" class="w-full max-w-xl bg-[#1c2541]/95 backdrop-blur-md border border-gray-700/80 rounded-2xl p-8 shadow-2xl space-y-6">
+            <h2 class="text-lg font-bold tracking-wide text-white uppercase text-center border-b border-gray-700 pb-4">
+                CONSULTA DE CÓDIGOS — BANDEJA MATRIZ
+            </h2>
+            
+            <!-- Formulario de Consulta (email-checker-form) -->
+            <div class="email-checker-form space-y-4 text-left">
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">Selecciona la plataforma (Asunto):</label>
+                    <select id="selectPlataformaPublica" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-yellow-400">
+                        <!-- Se llena dinámicamente -->
+                    </select>
                 </div>
 
-                <!-- Contenedor donde se despliega el resultado exacto -->
-                <div id="resultadoPublico" class="text-left"></div>
-            </div>
-        </main>
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">Correo del cliente a consultar:</label>
+                    <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
+                </div>
 
-        <footer class="text-center py-6 text-xs text-gray-500">
-            World Entretenimiento & Code Codex | Matriz: codigosworld@gmail.com
-        </footer>
+                <button onclick="ejecutarBusquedaModular()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                    Buscar Último Código Recibido
+                </button>
+            </div>
+
+            <!-- Loader Box (Simulando la carga fluida de la app de referencia) -->
+            <div id="loader-box" class="hidden text-center py-6">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-yellow-400 border-t-transparent"></div>
+                <p class="text-xs text-gray-400 mt-2">Consultando bandeja matriz <code>codigosworld@gmail.com</code>...</p>
+            </div>
+
+            <!-- Mensaje / Resultado Principal (email-checker-message) -->
+            <div id="email-checker-message" class="text-left"></div>
+        </div>
+    </main>
+
+    <!-- POPUP OVERLAY DE RESULTADO (Estilo Modal flotante idéntico a las referencias) -->
+    <div id="zmc-popup-overlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#1c2541] border border-yellow-500/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative animate-scale-up">
+            <button onclick="cerrarPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
+            
+            <div class="flex items-center gap-2 border-b border-gray-700 pb-3">
+                <span class="text-yellow-400 text-xl">📩</span>
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Último Correo Filtrado en Matriz</h3>
+                    <p id="popupSubCorreo" class="text-xs text-gray-400"></p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-[#0b132b] p-3 rounded-xl border border-gray-700">
+                    <span class="text-[10px] text-gray-400 block uppercase font-bold">Asunto del Correo:</span>
+                    <p id="popupAsunto" class="text-xs text-white font-medium mt-0.5"></p>
+                </div>
+
+                <div class="flex justify-between items-center bg-[#0b132b] p-4 rounded-xl border border-yellow-500/30">
+                    <div>
+                        <span class="text-[10px] text-yellow-400 block uppercase font-bold">Fecha y Hora exacta:</span>
+                        <p id="popupFecha" class="text-xs text-gray-300 font-mono mt-0.5"></p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-gray-400 block uppercase font-bold">Código Extraído:</span>
+                        <span id="popupCodigo" class="text-2xl font-black text-yellow-400 tracking-wider"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button id="btnCopiarPopup" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg">
+                    Copiar Código
+                </button>
+                <button onclick="cerrarPopup()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm">
+                    Cerrar
+                </button>
+            </div>
+        </div>
     </div>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 text-center py-6 text-xs text-gray-500">
+        World Entretenimiento & Code Codex | Matriz: codigosworld@gmail.com
+    </footer>
 
     <!-- PANEL ADMINISTRATIVO -->
     <div id="vistaAdmin" class="hidden fixed inset-0 bg-[#0b132b] z-50 flex">
@@ -137,8 +188,8 @@
                 <div class="pt-4 border-t border-gray-700 space-y-2">
                     <h2 class="text-sm font-bold text-white">Registrador de Entradas a la Matriz</h2>
                     <p class="text-xs text-gray-400">Registra aquí los correos reales que van llegando a <code>codigosworld@gmail.com</code>:</p>
-                    <input type="text" id="simCorreo" placeholder="Correo del cliente (ej: danae0973904@gmail.com)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
-                    <input type="text" id="simAsunto" placeholder="Asunto exacto (ej: Tu código de acceso único para Disney+)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
+                    <input type="text" id="simCorreo" placeholder="Correo del cliente (ej: cliente@gmail.com)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
+                    <input type="text" id="simAsunto" placeholder="Asunto exacto de la plataforma" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
                     <input type="text" id="simCodigo" placeholder="Código recibido (ej: 482910)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
                     <button onclick="agregarCorreoRealMatriz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Guardar Registro en Matriz</button>
                 </div>
@@ -146,7 +197,7 @@
         </main>
     </div>
 
-    <!-- Script Definitivo con Limpieza de Caché Automática y Filtrado Estricto del Último Correo -->
+    <!-- SCRIPT DE FILTRADO, LOADER Y APERTURA DE POPUP DEL ÚLTIMO CORREO -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
 
@@ -175,10 +226,9 @@
     }
 
     window.onload = () => {
-        // Limpieza automática de versiones anteriores de caché defectuosas para evitar datos viejos
-        if (localStorage.getItem('world_version_limpieza') !== 'v3') {
+        if (localStorage.getItem('world_version_limpieza') !== 'v4') {
             localStorage.removeItem('world_matriz_correos');
-            localStorage.setItem('world_version_limpieza', 'v3');
+            localStorage.setItem('world_version_limpieza', 'v4');
         }
 
         actualizarSelectorPublico();
@@ -207,20 +257,22 @@
             asunto: a,
             codigo: cod,
             fechaHora: new Date().toLocaleString(),
-            timestamp: new Date().getTime() // Marca temporal exacta para ordenamiento
+            timestamp: new Date().getTime()
         });
 
         localStorage.setItem('world_matriz_correos', JSON.stringify(bandeja));
-        alert("¡Correo registrado con éxito en la matriz con la hora actual!");
+        alert("¡Correo registrado con éxito en la matriz!");
         document.getElementById('simCorreo').value = "";
         document.getElementById('simAsunto').value = "";
         document.getElementById('simCodigo').value = "";
     }
 
-    function filtrarYAbrirUltimoCorreo() {
+    // EJECUTAR BÚSQUEDA CON LOADER Y APERTURA AUTOMÁTICA DEL POPUP DEL ÚLTIMO CORREO
+    function ejecutarBusquedaModular() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim().toLowerCase();
-        const contenedor = document.getElementById('resultadoPublico');
+        const loaderBox = document.getElementById('loader-box');
+        const messageBox = document.getElementById('email-checker-message');
 
         if (!correoCliente) {
             alert("Por favor, ingresa el correo del cliente.");
@@ -232,12 +284,15 @@
             return;
         }
 
-        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL}</b> el último correo de <b>${correoCliente}</b>...</div>`;
+        // Mostrar Loader (simulando la app de referencia)
+        loaderBox.classList.remove('hidden');
+        messageBox.innerHTML = "";
 
         setTimeout(() => {
+            loaderBox.classList.add('hidden');
             const bandejaMatriz = JSON.parse(localStorage.getItem('world_matriz_correos')) || [];
 
-            // FILTRADO ESTRICTO: Matriz oficial + Correo del cliente exacto + Asunto exacto
+            // FILTRADO ESTRICTO: Matriz oficial + Correo exacto + Asunto
             const filtrados = bandejaMatriz.filter(item => {
                 const matrizItem = (item.matriz || "").trim().toLowerCase();
                 const correoItem = (item.correo || "").trim().toLowerCase();
@@ -251,54 +306,44 @@
             });
 
             if (filtrados.length === 0) {
-                contenedor.innerHTML = `
+                messageBox.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
                         No se encontró ningún correo en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con este asunto.<br>
-                        <span class='text-xs text-gray-400 mt-1 block'>(Ve al Panel Admin -> Correo Matriz y Registros para dar de alta el correo y su código).</span>
+                        <span class='text-xs text-gray-400 mt-1 block'>(Ve al Panel Admin -> Correo Matriz y Registros para dar de alta el correo).</span>
                     </div>
                 `;
                 return;
             }
 
-            // ORDENAMIENTO CRONOLÓGICO ESTRICTO: Del más nuevo al más antiguo (timestamp descendente)
+            // ORDENAMIENTO CRONOLÓGICO ESTRICTO: Descendente por timestamp (más nuevo primero)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
             
-            // TOMAR ESTRICTAMENTE EL ÚLTIMO CORREO FILTRADO (El más reciente en hora y fecha)
-            const ultimoCorreoFiltrado = filtrados[0];
+            // TOMAR EXCLUSIVAMENTE EL ÚLTIMO CORREO FILTRADO
+            const ultimoCorreo = filtrados[0];
 
-            // Renderizar y abrir el resultado del último correo filtrado
-            contenedor.innerHTML = `
-                <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl animate-fade-in'>
-                    <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
-                        <div>
-                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo filtrado abierto con éxito!</span>
-                            <h3 class='text-white font-bold text-base mt-1'>${ultimoCorreoFiltrado.asunto}</h3>
-                            <p class='text-xs text-gray-400 mt-0.5'>Matriz: <strong>${CORREO_MATRIZ_OFICIAL}</strong> → Cliente: ${ultimoCorreoFiltrado.correo}</p>
-                            <p class='text-xs text-yellow-400 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${ultimoCorreoFiltrado.fechaHora}</p>
-                        </div>
-                        <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
-                            ${ultimoCorreoFiltrado.codigo}
-                        </div>
-                    </div>
+            // Abrir automáticamente el Popup Overlay con el resultado exacto
+            abrirPopupUltimoCorreo(ultimoCorreo);
 
-                    <div class='space-y-1.5'>
-                        <label class='text-xs text-gray-400 font-medium'>Contenido del Último Correo:</label>
-                        <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            Estimado usuario, este es el mensaje más reciente recibido en ${CORREO_MATRIZ_OFICIAL} para ${ultimoCorreoFiltrado.correo}. Su código de verificación correspondiente es: ${ultimoCorreoFiltrado.codigo}.
-                        </div>
-                    </div>
+        }, 400);
+    }
 
-                    <div class='flex gap-3 pt-2'>
-                        <button onclick="navigator.clipboard.writeText('${ultimoCorreoFiltrado.codigo}'); alert('¡Código ${ultimoCorreoFiltrado.codigo} copiado!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
-                            Copiar Código (${ultimoCorreoFiltrado.codigo})
-                        </button>
-                        <button onclick="document.getElementById('resultadoPublico').innerHTML='';" class='bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm'>
-                            Nueva Consulta
-                        </button>
-                    </div>
-                </div>
-            `;
-        }, 300);
+    function abrirPopupUltimoCorreo(correoObj) {
+        document.getElementById('popupSubCorreo').innerText = `Matriz: ${CORREO_MATRIZ_OFICIAL} → Cliente: ${correoObj.correo}`;
+        document.getElementById('popupAsunto').innerText = correoObj.asunto;
+        document.getElementById('popupFecha').innerText = correoObj.fechaHora;
+        document.getElementById('popupCodigo').innerText = correoObj.codigo;
+        
+        const btnCopiar = document.getElementById('btnCopiarPopup');
+        btnCopiar.onclick = () => {
+            navigator.clipboard.writeText(correoObj.codigo);
+            alert(`¡Código ${correoObj.codigo} copiado al portapapeles!`);
+        };
+
+        document.getElementById('zmc-popup-overlay').classList.remove('hidden');
+    }
+
+    function cerrarPopup() {
+        document.getElementById('zmc-popup-overlay').classList.add('hidden');
     }
 
     function abrirAdmin() { 
