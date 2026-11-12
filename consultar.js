@@ -30,14 +30,19 @@ export default async function handler(req, res) {
         }
 
         let mejorCoincidencia = null;
+        const correoBuscado = correo.trim().toLowerCase();
+        const asuntoBuscado = asunto ? asunto.trim().toLowerCase() : "";
 
+        // Recorremos todos los documentos para encontrar el que cumpla AMBAS condiciones de manera estricta
         for (const doc of data.documents) {
             const fields = doc.fields;
             const correoDoc = fields.correo && fields.correo.stringValue ? fields.correo.stringValue.trim().toLowerCase() : "";
             const asuntoDoc = fields.asunto && fields.asunto.stringValue ? fields.asunto.stringValue.trim().toLowerCase() : "";
-            const asuntoBuscado = asunto ? asunto.trim().toLowerCase() : "";
 
-            if (correoDoc === correo.trim().toLowerCase()) {
+            // 1. Validar que el correo sea exactamente el mismo
+            if (correoDoc === correoBuscado) {
+                
+                // 2. Validar de forma estricta que el asunto del registro contenga o coincida con la plataforma seleccionada
                 const coincideAsunto = !asuntoBuscado || asuntoDoc.includes(asuntoBuscado) || asuntoBuscado.includes(asuntoDoc);
 
                 if (coincideAsunto) {
@@ -47,7 +52,7 @@ export default async function handler(req, res) {
                         cuerpo: fields.cuerpo ? fields.cuerpo.stringValue : (fields.mensaje ? fields.mensaje.stringValue : "Sin contenido detallado"),
                         fecha: fields.fecha ? fields.fecha.stringValue : "Reciente"
                     };
-                    break; 
+                    break; // Al estar ordenados o encontrar el primero válido correspondiente a esa plataforma, lo capturamos
                 }
             }
         }
@@ -60,7 +65,7 @@ export default async function handler(req, res) {
         } else {
             return res.status(200).json({ 
                 success: false, 
-                message: `No se encontró ningún código para el correo ${correo} con este filtro.` 
+                message: `No se encontró ningún correo para ${correo} con el asunto: "${asunto || 'Seleccionado'}".` 
             });
         }
 
