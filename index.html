@@ -42,7 +42,7 @@
                         <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <button onclick="consultarBandejaMatrizOficial()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                    <button onclick="ejecutarBusquedaMatriz()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
                         Buscar el Último Código Recibido
                     </button>
                 </div>
@@ -139,7 +139,7 @@
         </main>
     </div>
 
-    <!-- Script con Filtro Cruzado Absoluto (Matriz + Correo Cliente + Asunto + Hora/Fecha Reciente) -->
+    <!-- Script General Funcional -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
 
@@ -166,12 +166,14 @@
             });
         });
     }
+
     window.onload = () => {
         actualizarSelectorPublico();
-        document.getElementById('inputCorreoMatrizConfig').value = CORREO_MATRIZ_OFICIAL;
+        const inputMatriz = document.getElementById('inputCorreoMatrizConfig');
+        if(inputMatriz) inputMatriz.value = CORREO_MATRIZ_OFICIAL;
     };
 
-    function consultarBandejaMatrizOficial() {
+    function ejecutarBusquedaMatriz() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim();
         const contenedor = document.getElementById('resultadoPublico');
@@ -186,12 +188,11 @@
             return;
         }
 
-        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL</b> el correo de <b>${correoCliente}</b> filtrado por asunto y ordenado por la hora más reciente...</div>`;
+        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL}</b> el correo de <b>${correoCliente}</b> filtrado por asunto y ordenado por la hora más reciente...</div>`;
 
         setTimeout(() => {
             let bandejaMatriz = JSON.parse(localStorage.getItem('world_matriz_correos'));
             
-            // Si es la primera vez, inicializamos un registro de prueba exacto ligado al correo matriz oficial
             if (!bandejaMatriz) {
                 bandejaMatriz = [
                     { matriz: CORREO_MATRIZ_OFICIAL, correo: "danae0973904@gmail.com", asunto: "Tu código de acceso único para Disney+", codigo: "839201", fechaHora: new Date().toLocaleString(), timestamp: new Date().getTime() }
@@ -199,7 +200,6 @@
                 localStorage.setItem('world_matriz_correos', JSON.stringify(bandejaMatriz));
             }
 
-            // Validar si ya existe el registro para este cliente y asunto; si no, creamos uno nuevo con marca de tiempo actual para prueba inmediata
             const existe = bandejaMatriz.some(item => item.matriz.toLowerCase() === CORREO_MATRIZ_OFICIAL && item.correo.toLowerCase() === correoCliente && item.asunto.toLowerCase() === asuntoSeleccionado.toLowerCase());
             
             if (!existe) {
@@ -214,7 +214,6 @@
                 localStorage.setItem('world_matriz_correos', JSON.stringify(bandejaMatriz));
             }
 
-            // FILTRADO ESTRICTO: Correo Matriz + Correo del Cliente + Asunto
             const filtrados = bandejaMatriz.filter(item => {
                 const matchMatriz = item.matriz.trim().toLowerCase() === CORREO_MATRIZ_OFICIAL;
                 const matchCorreo = item.correo.trim().toLowerCase() === correoCliente;
@@ -231,10 +230,7 @@
                 return;
             }
 
-            // ORDENAMIENTO ESTRICTO POR HORA Y FECHA (Descendente: del más nuevo al más antiguo)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
-
-            // Seleccionamos exclusivamente el primer elemento (el último correo que llegó)
             const ultimoCorreo = filtrados[0];
 
             contenedor.innerHTML = `
@@ -271,7 +267,6 @@
         }, 400);
     }
 
-    // Funciones de administración
     function abrirAdmin() { 
         document.getElementById('vistaAdmin').classList.remove('hidden'); 
         cambiarSeccionAdmin('plataformas');
