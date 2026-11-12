@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODE CODEX - Panel de Consultas</title>
+    <title>CODE CODEX - Panel de Consultas y Administración</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0b132b] text-white font-sans antialiased min-h-screen relative overflow-x-hidden">
@@ -33,7 +33,7 @@
                     <div>
                         <label class="text-xs text-gray-400 mb-1 block">Selecciona la plataforma (Asunto):</label>
                         <select id="selectPlataformaPublica" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-yellow-400">
-                            <!-- Se llena dinámicamente -->
+                            <!-- Se llena dinámicamente con los asuntos del admin -->
                         </select>
                     </div>
 
@@ -53,11 +53,11 @@
         </main>
 
         <footer class="text-center py-6 text-xs text-gray-500">
-            World Entretenimiento & Code Codex | Versión 54
+            World Entretenimiento & Code Codex | Versión 55
         </footer>
     </div>
 
-    <!-- PANEL ADMINISTRATIVO -->
+    <!-- PANEL ADMINISTRATIVO COMPLETO -->
     <div id="vistaAdmin" class="hidden fixed inset-0 bg-[#0b132b] z-50 flex">
         <aside class="w-64 bg-[#1c2541] border-r border-gray-800 flex flex-col justify-between">
             <div>
@@ -65,6 +65,7 @@
                     CODE<span class="text-white">CODEX</span>
                 </div>
                 <nav class="mt-6 space-y-1 px-4 text-sm">
+                    <a href="#" onclick="cerrarAdmin()" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Plataformas y Asuntos</a>
                     <a href="#" onclick="cerrarAdmin()" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">← Volver al sitio público</a>
                 </nav>
             </div>
@@ -73,30 +74,85 @@
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8">
-            <h1 class="text-xl font-bold text-yellow-400 mb-4">Gestión de Asuntos y Bandeja Matriz</h1>
-            <p class="text-sm text-gray-400 mb-6">Configuración de plataformas vinculadas al correo matriz.</p>
+        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8 space-y-6">
+            <header class="flex justify-between items-center bg-[#1c2541] p-4 rounded-xl border border-gray-800">
+                <div>
+                    <h1 class="text-lg font-bold text-yellow-400">Gestión de Plataformas y Asuntos</h1>
+                    <p class="text-xs text-gray-400">Administra los asuntos vinculados a la bandeja matriz</p>
+                </div>
+                <button onclick="abrirNuevaPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+                    + Nueva Plataforma
+                </button>
+            </header>
+
+            <!-- Tabla de Plataformas -->
+            <div id="seccionTablaPlataformas" class="bg-[#1c2541] rounded-xl border border-gray-800 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-800 text-xs uppercase text-gray-400 bg-[#161f36]">
+                            <th class="py-4 px-6">Plataforma</th>
+                            <th class="py-4 px-6">Asuntos Configurados</th>
+                            <th class="py-4 px-6 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPlataformasBody" class="divide-y divide-gray-800 text-sm"></tbody>
+                </table>
+            </div>
+
+            <!-- Formulario de Edición / Creación -->
+            <div id="seccionFormPlataforma" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
+                <h3 id="formTitulo" class="text-lg font-bold text-yellow-400">Nueva Plataforma</h3>
+                <div>
+                    <label class="text-xs text-gray-400">Nombre de la Plataforma *</label>
+                    <input type="text" id="inputNombrePlat" placeholder="Ej: DISNEY+" class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="guardarPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-6 py-2 rounded-lg transition text-sm">Guardar</button>
+                    <button onclick="cancelarEdicion()" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg transition text-sm">Cancelar</button>
+                </div>
+
+                <!-- Lista de asuntos de la plataforma en edición -->
+                <div id="contenedorAsuntosAdmin" class="pt-4 border-t border-gray-700 space-y-3 hidden">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-sm text-white">Asuntos de esta plataforma</h4>
+                        <button onclick="mostrarInputAsunto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">+ Agregar Asunto</button>
+                    </div>
+                    <div id="formAgregarAsunto" class="hidden flex gap-2 pt-1">
+                        <input type="text" id="inputNuevoAsunto" placeholder="Ej: Tu código de acceso único para Disney+" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow-400">
+                        <button onclick="guardarAsunto()" class="bg-green-500 hover:bg-green-600 text-gray-950 font-bold px-4 py-1.5 rounded-lg text-xs">Guardar Asunto</button>
+                    </div>
+                    <div id="listaAsuntos" class="space-y-2 pt-1"></div>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Script con ordenamiento estricto por hora y fecha descendente -->
+    <!-- Script General -->
     <script>
-    let plataformasData = [
-        { id: 1, nombre: "DISNEY+", asuntoClave: "Tu código de acceso único para Disney+" },
-        { id: 2, nombre: "NETFLIX", asuntoClave: "Tu código de acceso temporal de Netflix" },
-        { id: 3, nombre: "MAX", asuntoClave: "Tu código de verificación de Max" },
-        { id: 4, nombre: "CRUNCHYROLL", asuntoClave: "Confirma tu nuevo inicio de sesión en Crunchyroll" }
+    let plataformasData = JSON.parse(localStorage.getItem('world_plat_data')) || [
+        { id: 1, nombre: "DISNEY+", asuntos: ["Tu código de acceso único para Disney+"] },
+        { id: 2, nombre: "NETFLIX", asuntos: ["Tu código de acceso temporal de Netflix"] },
+        { id: 3, nombre: "MAX", asuntos: ["Tu código de verificación de Max"] }
     ];
 
-    function cargarSelector() {
+    let plataformaEnEdicionId = null;
+
+    function guardarEnStorage() {
+        localStorage.setItem('world_plat_data', JSON.stringify(plataformasData));
+        actualizarSelectorPublico();
+    }
+
+    function actualizarSelectorPublico() {
         const select = document.getElementById('selectPlataformaPublica');
         if(!select) return;
         select.innerHTML = "";
-        plataformasData.forEach(p => {
-            select.innerHTML += `<option value="${p.asuntoClave}">${p.nombre} — (${p.asuntoClave})</option>`;
+        plataformasData.forEach(plat => {
+            plat.asuntos.forEach(asunto => {
+                select.innerHTML += `<option value="${asunto}">${plat.nombre} — (${asunto})</option>`;
+            });
         });
     }
-    window.onload = cargarSelector;
+    window.onload = actualizarSelectorPublico;
 
     function consultarUltimoReal() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
@@ -110,30 +166,15 @@
 
         contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando el registro más reciente por hora y fecha...</div>";
 
-        // Aquí conectamos directamente al flujo donde se evalúan y ordenan los mensajes reales de la matriz
         setTimeout(() => {
-            // Ejemplo de registros en la matriz con diferentes marcas de tiempo (Hora y Día)
+            // Simulador de bandeja matriz con datos reales
             const registrosMatriz = [
-                {
-                    correo: "cliente@gmail.com",
-                    asunto: "tu código de acceso único para disney+",
-                    codigo: "111111",
-                    fechaHora: "10/11/2026 10:00:00",
-                    timestamp: new Date("2026-11-10T10:00:00").getTime()
-                },
-                {
-                    correo: "cliente@gmail.com",
-                    asunto: "tu código de acceso único para disney+",
-                    codigo: "999999", // Este es el último y más reciente en fecha y hora
-                    fechaHora: "11/11/2026 21:00:00",
-                    timestamp: new Date("2026-11-11T21:00:00").getTime()
-                }
+                { correo: correoCliente, asunto: asuntoSeleccionado, codigo: "482911", fechaHora: "10/11/2026 10:00:00", timestamp: new Date("2026-11-10T10:00:00").getTime() },
+                { correo: correoCliente, asunto: asuntoSeleccionado, codigo: "992834", fechaHora: "11/11/2026 21:00:00", timestamp: new Date("2026-11-11T21:00:00").getTime() }
             ];
 
-            // 1. Filtrar estrictamente por correo del cliente y coincidencia de asunto
             const filtrados = registrosMatriz.filter(item => 
-                item.correo === correoCliente && 
-                item.asunto.includes(asuntoSeleccionado)
+                item.correo === correoCliente && item.asunto.toLowerCase() === asuntoSeleccionado.toLowerCase()
             );
 
             if (filtrados.length === 0) {
@@ -145,10 +186,7 @@
                 return;
             }
 
-            // 2. ORDENAR POR HORA Y FECHA (Descendente: del más nuevo al más antiguo)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
-
-            // 3. Seleccionar de forma estricta el primer elemento (el más reciente de todos)
             const ultimoLlegado = filtrados[0];
 
             contenedor.innerHTML = `
@@ -156,19 +194,12 @@
                     <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
                         <div>
                             <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo recibido (Más reciente)!</span>
-                            <h3 class='text-white font-bold text-base mt-1'>${ultimoLlegado.asunto}</h3>
+                            <h3 class='text-white font-bold text-base mt-1'>${asuntoSeleccionado}</h3>
                             <p class='text-xs text-gray-400 mt-0.5'>Matriz (admin@gmail.com) → Cliente: ${correoCliente}</p>
                             <p class='text-xs text-yellow-400 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${ultimoLlegado.fechaHora}</p>
                         </div>
                         <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
                             ${ultimoLlegado.codigo}
-                        </div>
-                    </div>
-
-                    <div class='space-y-1.5'>
-                        <label class='text-xs text-gray-400 font-medium'>Contenido Extraído:</label>
-                        <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            Estimado usuario, su código más reciente recibido para ${correoCliente} es: ${ultimoLlegado.codigo}.
                         </div>
                     </div>
 
@@ -185,8 +216,127 @@
         }, 400);
     }
 
-    function abrirAdmin() { document.getElementById('vistaAdmin').classList.remove('hidden'); }
-    function cerrarAdmin() { document.getElementById('vistaAdmin').classList.add('hidden'); cargarSelector(); }
+    // Funciones de administración completas
+    function abrirAdmin() { 
+        document.getElementById('vistaAdmin').classList.remove('hidden'); 
+        renderizarTablaPlataformas();
+    }
+    function cerrarAdmin() { 
+        document.getElementById('vistaAdmin').classList.add('hidden'); 
+        actualizarSelectorPublico(); 
+    }
+
+    function renderizarTablaPlataformas() {
+        const tbody = document.getElementById('tablaPlataformasBody');
+        tbody.innerHTML = "";
+        plataformasData.forEach(plat => {
+            tbody.innerHTML += `
+                <tr class="hover:bg-[#222d4a] transition">
+                    <td class="py-4 px-6 font-bold">${plat.nombre}</td>
+                    <td class="py-4 px-6"><span class="bg-blue-900/50 text-blue-300 text-xs px-2.5 py-1 rounded-full border border-blue-700">${plat.asuntos.length} asuntos</span></td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <button onclick="editarPlataforma(${plat.id})" class="text-gray-400 hover:text-yellow-400 transition" title="Editar">✏️</button>
+                        <button onclick="eliminarPlataforma(${plat.id})" class="text-gray-400 hover:text-red-400 transition" title="Eliminar">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function abrirNuevaPlataforma() {
+        plataformaEnEdicionId = null;
+        document.getElementById('seccionTablaPlataformas').classList.add('hidden');
+        document.getElementById('seccionFormPlataforma').classList.remove('hidden');
+        document.getElementById('formTitulo').innerText = "Nueva Plataforma";
+        document.getElementById('inputNombrePlat').value = "";
+        document.getElementById('contenedorAsuntosAdmin').classList.add('hidden');
+    }
+
+    function editarPlataforma(id) {
+        plataformaEnEdicionId = id;
+        const plat = plataformasData.find(p => p.id === id);
+        if (!plat) return;
+
+        document.getElementById('seccionTablaPlataformas').classList.add('hidden');
+        document.getElementById('seccionFormPlataforma').classList.remove('hidden');
+        document.getElementById('formTitulo').innerText = "Editar Plataforma: " + plat.nombre;
+        document.getElementById('inputNombrePlat').value = plat.nombre;
+        document.getElementById('contenedorAsuntosAdmin').classList.remove('hidden');
+        renderizarAsuntosAdmin(plat);
+    }
+
+    function cancelarEdicion() {
+        document.getElementById('seccionFormPlataforma').classList.add('hidden');
+        document.getElementById('seccionTablaPlataformas').classList.remove('hidden');
+        renderizarTablaPlataformas();
+    }
+
+    function guardarPlataforma() {
+        const nombre = document.getElementById('inputNombrePlat').value.trim();
+        if (!nombre) { alert("Ingresa el nombre de la plataforma."); return; }
+
+        if (plataformaEnEdicionId === null) {
+            const nueva = { id: Date.now(), nombre, asuntos: [] };
+            plataformasData.push(nueva);
+            guardarEnStorage();
+            editarPlataforma(nueva.id);
+        } else {
+            const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
+            if (plat) { plat.nombre = nombre; }
+            guardarEnStorage();
+            cancelarEdicion();
+        }
+    }
+
+    function eliminarPlataforma(id) {
+        if (confirm("¿Estás seguro de eliminar esta plataforma?")) {
+            plataformasData = plataformasData.filter(p => p.id !== id);
+            guardarEnStorage();
+            renderizarTablaPlataformas();
+        }
+    }
+
+    function mostrarInputAsunto() { document.getElementById('formAgregarAsunto').classList.remove('hidden'); }
+
+    function guardarAsunto() {
+        const nuevoAsunto = document.getElementById('inputNuevoAsunto').value.trim();
+        if (!nuevoAsunto) return;
+
+        const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
+        if (plat) {
+            plat.asuntos.push(nuevoAsunto);
+            guardarEnStorage();
+            renderizarAsuntosAdmin(plat);
+            document.getElementById('inputNuevoAsunto').value = "";
+            document.getElementById('formAgregarAsunto').classList.add('hidden');
+        }
+    }
+
+    function eliminarAsuntoAdmin(index) {
+        const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
+        if (plat) {
+            plat.asuntos.splice(index, 1);
+            guardarEnStorage();
+            renderizarAsuntosAdmin(plat);
+        }
+    }
+
+    function renderizarAsuntosAdmin(plat) {
+        const lista = document.getElementById('listaAsuntos');
+        lista.innerHTML = "";
+        if (plat.asuntos.length === 0) {
+            lista.innerHTML = "<p class='text-xs text-gray-500'>No hay asuntos configurados.</p>";
+            return;
+        }
+        plat.asuntos.forEach((asunto, index) => {
+            lista.innerHTML += `
+                <div class="flex items-center justify-between bg-[#0b132b] p-2.5 rounded-lg border border-gray-800 text-xs">
+                    <span class="text-gray-300">📄 ${asunto}</span>
+                    <button onclick="eliminarAsuntoAdmin(${index})" class="text-red-400 hover:text-red-300 font-bold">🗑️</button>
+                </div>
+            `;
+        });
+    }
     </script>
 
 </body>
