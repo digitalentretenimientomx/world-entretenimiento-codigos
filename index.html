@@ -107,7 +107,7 @@
         World Entretenimiento & Code Codex | Matriz: codigosworld@gmail.com
     </footer>
 
-    <!-- PANEL ADMINISTRATIVO (Sólo gestiona plataformas y asuntos, ya no guarda códigos manuales) -->
+    <!-- PANEL ADMINISTRATIVO -->
     <div id="vistaAdmin" class="hidden fixed inset-0 bg-[#0b132b] z-50 flex">
         <aside class="w-64 bg-[#1c2541] border-r border-gray-800 flex flex-col justify-between">
             <div>
@@ -191,7 +191,7 @@
         </main>
     </div>
 
-    <!-- SCRIPT DE CONEXIÓN EN TIEMPO REAL CON EL CORREO MATRIZ -->
+    <!-- SCRIPT PRINCIPAL -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
 
@@ -232,7 +232,6 @@
         alert("¡URL de conexión guardada correctamente!");
     }
 
-    // CONSULTA DIRECTA AL CORREO MATRIZ (Gmail / API)
     function consultarCorreoMatrizReal() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim();
@@ -250,7 +249,6 @@
             return;
         }
 
-        // Si no han configurado la URL del script de conexión
         if (!webhookUrl) {
             messageBox.innerHTML = `
                 <div class='p-4 mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-xs space-y-2'>
@@ -264,10 +262,9 @@
         loaderBox.classList.remove('hidden');
         messageBox.innerHTML = "";
 
-        // Petición fetch a la API del correo matriz
         const urlConsulta = `${webhookUrl}?correo=${encodeURIComponent(correoCliente)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`;
 
-        fetch(urlConsulta)
+        fetch(urlConsulta, { method: 'GET', mode: 'cors' })
             .then(response => response.json())
             .then(data => {
                 loaderBox.classList.add('hidden');
@@ -281,8 +278,9 @@
                     });
                 } else {
                     messageBox.innerHTML = `
-                        <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                            No se encontró ningún correo reciente en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con este asunto.
+                        <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs space-y-1'>
+                            <p class='font-bold'>No se encontró ningún correo reciente en la matriz.</p>
+                            <p class='text-[10px] text-gray-400'>${data.debug || 'Verifica que el correo del cliente y el asunto coincidan con un mensaje real recibido en ${CORREO_MATRIZ_OFICIAL}.'}</p>
                         </div>
                     `;
                 }
@@ -291,7 +289,7 @@
                 loaderBox.classList.add('hidden');
                 messageBox.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs text-center'>
-                        Error al conectar con la bandeja matriz de Gmail. Verifica la URL de tu conector en el Panel Admin.
+                        Error al conectar con la bandeja matriz de Gmail. Verifica que la URL del Apps Script esté publicada para "Cualquiera".
                     </div>
                 `;
             });
