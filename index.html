@@ -14,6 +14,15 @@
             background-attachment: fixed;
             background-color: #0b132b;
         }
+        /* Estilo para aislar el HTML del correo en la vista previa */
+        #emailPreviewContainer {
+            background-color: #ffffff;
+            color: #000000;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 12px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="text-white font-sans antialiased min-h-screen relative overflow-x-hidden flex flex-col justify-between">
@@ -71,40 +80,47 @@
         </div>
     </main>
 
-    <!-- POPUP DE RESULTADO -->
+    <!-- POPUP DE RESULTADO CON VISTA PREVIA -->
     <div id="zmc-popup-overlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#1c2541] border border-[#ff6600]/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
+        <div class="bg-[#1c2541] border border-[#ff6600]/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative">
             <button onclick="cerrarPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
             
             <div class="flex items-center gap-3 border-b border-gray-700 pb-3">
                 <span class="text-[#ff6600] text-2xl">📩</span>
                 <div>
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">¡Información Encontrada!</h3>
-                    <p class="text-[11px] text-gray-400">Listo para entregar al cliente</p>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">¡Correo Encontrado en Matriz!</h3>
+                    <p class="text-[11px] text-gray-400">Vista previa del mensaje recibido</p>
                 </div>
             </div>
 
             <div class="space-y-3">
-                <div class="bg-[#0b132b] p-3 rounded-xl border border-gray-700">
-                    <span class="text-[10px] text-gray-400 block uppercase font-bold">Asunto:</span>
-                    <p id="popupAsunto" class="text-xs text-white font-medium mt-0.5"></p>
+                <div class="flex justify-between items-center bg-[#0b132b] p-3 rounded-xl border border-gray-700">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold">Asunto:</span>
+                    <span id="popupAsunto" class="text-xs text-white font-medium"></span>
                 </div>
 
-                <div class="flex flex-col gap-2 bg-[#0b132b] p-4 rounded-xl border border-[#ff6600]/30">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] text-[#ff6600] block uppercase font-bold">Fecha y Hora:</span>
-                        <p id="popupFecha" class="text-xs text-gray-300 font-mono mt-0.5"></p>
+                <div class="flex justify-between items-center bg-[#0b132b] p-3 rounded-xl border border-gray-700">
+                    <span class="text-[10px] text-[#ff6600] uppercase font-bold">Fecha y Hora:</span>
+                    <span id="popupFecha" class="text-xs text-gray-300 font-mono"></span>
+                </div>
+
+                <!-- Contenedor de Vista Previa HTML del Correo -->
+                <div>
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block mb-1">Vista Previa del Mensaje / Botón:</span>
+                    <div id="emailPreviewContainer">
+                        <!-- Aquí se renderiza el correo original con botones y enlaces -->
                     </div>
-                    <div>
-                        <span class="text-[10px] text-gray-400 block uppercase font-bold">Código o Enlace Extraído:</span>
-                        <div id="popupCodigo" class="text-sm font-bold text-[#ff6600] break-all mt-1 bg-black/30 p-2 rounded border border-gray-800"></div>
-                    </div>
+                </div>
+
+                <div id="codigoExtraidoBox" class="bg-[#0b132b] p-3 rounded-xl border border-[#ff6600]/30 flex justify-between items-center">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold">Código Detectado:</span>
+                    <span id="popupCodigo" class="text-lg font-black text-[#ff6600]"></span>
                 </div>
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button id="btnCopiarPopup" class="flex-1 bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg">
-                    Copiar
+                    Copiar Código
                 </button>
                 <button onclick="cerrarPopup()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm">
                     Cerrar
@@ -201,7 +217,7 @@
                             <button onclick="mostrarInputAsunto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">+ Agregar Asunto</button>
                         </div>
                         <div id="formAgregarAsunto" class="hidden flex gap-2 pt-1">
-                            <input type="text" id="inputNuevoAsunto" placeholder="Ej: Enlace para restablecer contraseña" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ff6600]">
+                            <input type="text" id="inputNuevoAsunto" placeholder="Ej: Restablece tu contraseña de Spotify" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ff6600]">
                             <button onclick="guardarAsunto()" class="bg-green-500 hover:bg-green-600 text-gray-950 font-bold px-4 py-1.5 rounded-lg text-xs">Guardar Asunto</button>
                         </div>
                         <div id="listaAsuntos" class="space-y-2 pt-1"></div>
@@ -211,9 +227,9 @@
         </main>
     </div>
 
-    <!-- SCRIPT PRINCIPAL CON LA NUEVA URL FIJA -->
+    <!-- SCRIPT PRINCIPAL -->
     <script>
-    const WEBHOOK_URL_FIJA = "https://script.google.com/macros/s/AKfycbwo2KArz-Lob8k6IRckZAd7p_yTgOL_V8D_6EU9TgJcfpLZMUCuloLDMHZbF4gfvbSL/exec";
+    const WEBHOOK_URL_FIJA = "https://script.google.com/macros/s/AKfycbyXXO_LQAcm32E7pN6s-YoMSNEvGPgRce8XtwtdV3DQ6fu4TAZis0XwvomEpIVTRImL/exec";
     const ADMIN_CORREO_VALIDO = "codigosworld@gmail.com";
     const ADMIN_PASS_VALIDO = "World2026*";
 
@@ -320,8 +336,13 @@
             .then(res => res.json())
             .then(data => {
                 loaderBox.classList.add('hidden');
-                if (data.encontrado && data.codigo) {
-                    abrirPopupResultado({ asunto: asuntoSeleccionado, codigo: data.codigo, fechaHora: data.fechaHora || new Date().toLocaleString() });
+                if (data.encontrado) {
+                    abrirPopupResultado({ 
+                        asunto: asuntoSeleccionado, 
+                        codigo: data.codigo, 
+                        htmlContenido: data.htmlContenido || "Sin contenido",
+                        fechaHora: data.fechaHora || new Date().toLocaleString() 
+                    });
                 } else {
                     messageBox.innerHTML = `<div class='p-4 mt-4 bg-red-500/10 rounded-xl text-red-400 text-xs'>No se encontró ningún correo reciente en la matriz.</div>`;
                 }
@@ -336,10 +357,16 @@
         document.getElementById('popupAsunto').innerText = obj.asunto;
         document.getElementById('popupFecha').innerText = obj.fechaHora;
         document.getElementById('popupCodigo').innerText = obj.codigo;
-        document.getElementById('btnCopiarPopup').onclick = () => {
+        
+        // Inyectamos el diseño HTML original del correo en la caja de vista previa
+        document.getElementById('emailPreviewContainer').innerHTML = obj.htmlContenido;
+
+        const btnCopiar = document.getElementById('btnCopiarPopup');
+        btnCopiar.onclick = () => {
             navigator.clipboard.writeText(obj.codigo);
-            alert(`¡Copiado al portapapeles!`);
+            alert(`¡Código ${obj.codigo} copiado al portapapeles!`);
         };
+
         document.getElementById('zmc-popup-overlay').classList.remove('hidden');
     }
 
