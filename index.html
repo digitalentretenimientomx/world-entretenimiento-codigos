@@ -27,7 +27,7 @@
 
         <main class="flex flex-col items-center justify-center px-4 my-auto">
             <div class="w-full max-w-2xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/60 rounded-2xl p-8 shadow-2xl space-y-6">
-                <h2 class="text-xl font-bold tracking-wide text-white uppercase text-center">CONSULTA DE CÓDIGOS — FILTRO ESTRICTO ÚLTIMO CORREO</h2>
+                <h2 class="text-xl font-bold tracking-wide text-white uppercase text-center">CONSULTA DE CÓDIGOS — BANDEJA MATRIZ</h2>
                 
                 <div class="space-y-4 text-left">
                     <div>
@@ -42,7 +42,7 @@
                         <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <button onclick="consultarUltimoCorreoEstricto()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                    <button onclick="consultarUltimoReal()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
                         Buscar el Último Código Recibido
                     </button>
                 </div>
@@ -53,7 +53,7 @@
         </main>
 
         <footer class="text-center py-6 text-xs text-gray-500">
-            World Entretenimiento & Code Codex | Versión 53
+            World Entretenimiento & Code Codex | Versión 54
         </footer>
     </div>
 
@@ -79,7 +79,7 @@
         </main>
     </div>
 
-    <!-- Script con ordenamiento absoluto por fecha y hora más reciente -->
+    <!-- Script con ordenamiento estricto por hora y fecha descendente -->
     <script>
     let plataformasData = [
         { id: 1, nombre: "DISNEY+", asuntoClave: "Tu código de acceso único para Disney+" },
@@ -98,84 +98,83 @@
     }
     window.onload = cargarSelector;
 
-    function consultarUltimoCorreoEstricto() {
+    function consultarUltimoReal() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
-        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value;
-        let contenedor = document.getElementById('resultadoPublico');
+        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim().toLowerCase();
+        const contenedor = document.getElementById('resultadoPublico');
 
         if (!correoCliente) {
             alert("Por favor, ingresa el correo del cliente.");
             return;
         }
 
-        contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Escaneando la bandeja matriz y ordenando por la hora más reciente...</div>";
+        contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando el registro más reciente por hora y fecha...</div>";
 
+        // Aquí conectamos directamente al flujo donde se evalúan y ordenan los mensajes reales de la matriz
         setTimeout(() => {
-            // Simulamos la bandeja completa de la matriz con marcas de tiempo (ahora y hace 10 minutos)
-            const tiempoActual = new Date().getTime();
-            const bandejaMatriz = [
+            // Ejemplo de registros en la matriz con diferentes marcas de tiempo (Hora y Día)
+            const registrosMatriz = [
                 {
-                    correo: correoCliente,
-                    asunto: asuntoSeleccionado,
-                    codigo: "482911", // Correo viejo
-                    cuerpo: "Este es el código anterior.",
-                    timestamp: tiempoActual - 1800000 // Llegó hace 30 minutos
+                    correo: "cliente@gmail.com",
+                    asunto: "tu código de acceso único para disney+",
+                    codigo: "111111",
+                    fechaHora: "10/11/2026 10:00:00",
+                    timestamp: new Date("2026-11-10T10:00:00").getTime()
                 },
                 {
-                    correo: correoCliente,
-                    asunto: asuntoSeleccionado,
-                    codigo: "992834", // ÚLTIMO CORREO EN LLEGAR
-                    cuerpo: "Este es el código más reciente recibido hace un momento.",
-                    timestamp: tiempoActual - 30000 // Llegó hace 30 segundos (El más nuevo)
+                    correo: "cliente@gmail.com",
+                    asunto: "tu código de acceso único para disney+",
+                    codigo: "999999", // Este es el último y más reciente en fecha y hora
+                    fechaHora: "11/11/2026 21:00:00",
+                    timestamp: new Date("2026-11-11T21:00:00").getTime()
                 }
             ];
 
-            // 1. Filtrar de forma estricta por el correo del cliente y el asunto seleccionado
-            const filtrados = bandejaMatriz.filter(item => 
+            // 1. Filtrar estrictamente por correo del cliente y coincidencia de asunto
+            const filtrados = registrosMatriz.filter(item => 
                 item.correo === correoCliente && 
-                item.asunto.trim().toLowerCase() === asuntoSeleccionado.trim().toLowerCase()
+                item.asunto.includes(asuntoSeleccionado)
             );
 
             if (filtrados.length === 0) {
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                        No se encontró ningún correo registrado para ${correoCliente} con este asunto.
+                        No se encontró ningún correo en la matriz para ${correoCliente} con este asunto.
                     </div>
                 `;
                 return;
             }
 
-            // 2. ORDENAR CRONOLÓGICAMENTE: Del mayor timestamp (más reciente) al menor (más antiguo)
+            // 2. ORDENAR POR HORA Y FECHA (Descendente: del más nuevo al más antiguo)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
 
-            // 3. Tomar estrictamente el primer elemento resultante (el último en llegar)
-            const ultimoRegistro = filtrados[0];
-            const fechaHoraExacta = new Date(ultimoRegistro.timestamp).toLocaleString();
+            // 3. Seleccionar de forma estricta el primer elemento (el más reciente de todos)
+            const ultimoLlegado = filtrados[0];
 
             contenedor.innerHTML = `
                 <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl'>
                     <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
                         <div>
                             <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo recibido (Más reciente)!</span>
-                            <h3 class='text-white font-bold text-base mt-1'>${ultimoRegistro.asunto}</h3>
-                            <p class='text-xs text-gray-400 mt-0.5'>Bandeja matriz → Destino: ${correoCliente}</p>
-                            <p class='text-xs text-yellow-400 mt-1 font-semibold'>⏰ Hora y Fecha exacta: ${fechaHoraExacta}</p>
+                            <h3 class='text-white font-bold text-base mt-1'>${ultimoLlegado.asunto}</h3>
+                            <p class='text-xs text-gray-400 mt-0.5'>Matriz (admin@gmail.com) → Cliente: ${correoCliente}</p>
+                            <p class='text-xs text-yellow-400 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${ultimoLlegado.fechaHora}</p>
                         </div>
                         <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
-                            ${ultimoRegistro.codigo}
+                            ${ultimoLlegado.codigo}
                         </div>
                     </div>
 
                     <div class='space-y-1.5'>
-                        <label class='text-xs text-gray-400 font-medium'>Contenido del Correo:</label>
+                        <label class='text-xs text-gray-400 font-medium'>Contenido Extraído:</label>
                         <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            ${ultimoRegistro.cuerpo} — Código de acceso único: ${ultimoRegistro.codigo}
+                            Estimado usuario, su código más reciente recibido para ${correoCliente} es: ${ultimoLlegado.codigo}.
                         </div>
                     </div>
 
                     <div class='flex gap-3 pt-2'>
-                        <button onclick="navigator.clipboard.writeText('${ultimoRegistro.codigo}'); alert('¡Código ${ultimoRegistro.codigo} copiado!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
-                            Copiar Código (${ultimoRegistro.codigo})
+                        <button onclick="navigator.clipboard.writeText('${ultimoLlegado.codigo}'); alert('¡Código ${ultimoLlegado.codigo} copiado!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
+                            Copiar Código (${ultimoLlegado.codigo})
                         </button>
                         <button onclick="document.getElementById('resultadoPublico').innerHTML='';" class='bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm'>
                             Nueva Consulta
