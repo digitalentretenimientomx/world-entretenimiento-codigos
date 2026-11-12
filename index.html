@@ -20,7 +20,7 @@
             <span class="text-white">WORLD</span>
             <span class="text-[#ff6600]">ENTRETENIMIENTO</span>
         </div>
-        <button onclick="abrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-[#ff6600] px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
+        <button onclick="intentarAbrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-[#ff6600] px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
             <span>🔑</span> Panel Admin
         </button>
     </header>
@@ -29,7 +29,6 @@
     <main class="relative z-10 flex flex-col items-center justify-center px-4 my-auto">
         <div class="w-full max-w-xl bg-[#1c2541]/95 backdrop-blur-md border border-gray-700/80 rounded-2xl p-8 shadow-2xl space-y-6">
             
-            <!-- Título Principal Estilo Referencia (Blanco y Naranja) -->
             <div class="text-center border-b border-gray-700 pb-5">
                 <h1 class="text-3xl font-black tracking-tight leading-none text-white">WORLD</h1>
                 <h1 class="text-3xl font-black tracking-tight leading-none text-[#ff6600] mt-1">ENTRETENIMIENTO</h1>
@@ -57,7 +56,7 @@
             <!-- Loader de consulta en vivo -->
             <div id="loader-box" class="hidden text-center py-6">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#ff6600] border-t-transparent"></div>
-                <p class="text-xs text-gray-400 mt-2">Buscando en la bandeja de <code>codigosworld@gmail.com</code>...</p>
+                <p class="text-xs text-gray-400 mt-2">Buscando código en el sistema...</p>
             </div>
 
             <!-- Contenedor de Resultados -->
@@ -65,16 +64,16 @@
         </div>
     </main>
 
-    <!-- POPUP DE RESULTADO -->
+    <!-- POPUP DE RESULTADO (Limpio, sin mostrar correos) -->
     <div id="zmc-popup-overlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#1c2541] border border-[#ff6600]/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative">
+        <div class="bg-[#1c2541] border border-[#ff6600]/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
             <button onclick="cerrarPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
             
-            <div class="flex items-center gap-2 border-b border-gray-700 pb-3">
-                <span class="text-[#ff6600] text-xl">📩</span>
+            <div class="flex items-center gap-3 border-b border-gray-700 pb-3">
+                <span class="text-[#ff6600] text-2xl">📩</span>
                 <div>
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">¡Código Encontrado en Matriz!</h3>
-                    <p id="popupSubCorreo" class="text-xs text-gray-400"></p>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">¡Código Encontrado!</h3>
+                    <p class="text-[11px] text-gray-400">Listo para entregar al cliente</p>
                 </div>
             </div>
 
@@ -107,7 +106,33 @@
         </div>
     </div>
 
-    <!-- FOOTER SOLICITADO -->
+    <!-- MODAL DE LOGIN PARA EL PANEL ADMIN -->
+    <div id="modalLoginAdmin" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-[#1c2541] border border-[#ff6600]/60 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 relative">
+            <button onclick="cerrarLoginAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
+            
+            <div class="text-center pb-2 border-b border-gray-700">
+                <h3 class="text-base font-bold text-[#ff6600] uppercase tracking-wider">Acceso Administrativo</h3>
+                <p class="text-xs text-gray-400 mt-1">Introduce tus credenciales de seguridad</p>
+            </div>
+
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">Correo de Administrador:</label>
+                    <input type="email" id="inputAdminEmail" placeholder="codigosworld@gmail.com" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#ff6600]">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">Contraseña:</label>
+                    <input type="password" id="inputAdminPass" placeholder="••••••••" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#ff6600]">
+                </div>
+                <button onclick="verificarCredencialesAdmin()" class="w-full bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg mt-2">
+                    Ingresar al Panel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
     <footer class="relative z-10 text-center py-6 text-xs text-gray-400 font-medium">
         Hecho por World Entretenimiento
     </footer>
@@ -126,7 +151,7 @@
                 </nav>
             </div>
             <div class="p-4 border-t border-gray-800">
-                <button onclick="cerrarAdmin()" class="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition text-sm">Cerrar Panel</button>
+                <button onclick="cerrarAdmin()" class="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition text-sm">Cerrar Sesión</button>
             </div>
         </aside>
 
@@ -199,6 +224,10 @@
     <!-- SCRIPT PRINCIPAL -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
+    
+    // CREDENCIALES DEL PANEL ADMIN (Puedes cambiarlas aquí cuando gustes)
+    const ADMIN_CORREO_VALIDO = "codigosworld@gmail.com";
+    const ADMIN_PASS_VALIDO = "World2026*"; // Cambia esta contraseña por la que prefieras
 
     let plataformasData = JSON.parse(localStorage.getItem('world_plat_data')) || [
         { id: 1, nombre: "DISNEY+", asuntos: ["Tu código de acceso único para Disney+"] },
@@ -235,6 +264,30 @@
         const url = document.getElementById('inputWebhookUrl').value.trim();
         localStorage.setItem('world_webhook_url', url);
         alert("¡URL de conexión guardada correctamente!");
+    }
+
+    // CONTROL DE ACCESO AL PANEL ADMIN
+    function intentarAbrirAdmin() {
+        document.getElementById('modalLoginAdmin').classList.remove('hidden');
+    }
+
+    function cerrarLoginAdmin() {
+        document.getElementById('modalLoginAdmin').classList.add('hidden');
+    }
+
+    function verificarCredencialesAdmin() {
+        const emailIngresado = document.getElementById('inputAdminEmail').value.trim().toLowerCase();
+        const passIngresada = document.getElementById('inputAdminPass').value.trim();
+
+        if (emailIngresado === ADMIN_CORREO_VALIDO.toLowerCase() && passIngresada === ADMIN_PASS_VALIDO) {
+            cerrarLoginAdmin();
+            document.getElementById('inputAdminEmail').value = "";
+            document.getElementById('inputAdminPass').value = "";
+            document.getElementById('vistaAdmin').classList.remove('hidden');
+            cambiarSeccionAdmin('plataformas');
+        } else {
+            alert("Acceso denegado. Correo o contraseña incorrectos.");
+        }
     }
 
     function consultarCorreoMatrizReal() {
@@ -276,7 +329,6 @@
                 
                 if (data.encontrado && data.codigo) {
                     abrirPopupResultado({
-                        correo: correoCliente,
                         asunto: asuntoSeleccionado,
                         codigo: data.codigo,
                         fechaHora: data.fechaHora || new Date().toLocaleString()
@@ -301,7 +353,6 @@
     }
 
     function abrirPopupResultado(correoObj) {
-        document.getElementById('popupSubCorreo').innerText = `Matriz: ${CORREO_MATRIZ_OFICIAL} → Cliente: ${correoObj.correo}`;
         document.getElementById('popupAsunto').innerText = correoObj.asunto;
         document.getElementById('popupFecha').innerText = correoObj.fechaHora;
         document.getElementById('popupCodigo').innerText = correoObj.codigo;
@@ -319,10 +370,6 @@
         document.getElementById('zmc-popup-overlay').classList.add('hidden');
     }
 
-    function abrirAdmin() { 
-        document.getElementById('vistaAdmin').classList.remove('hidden'); 
-        cambiarSeccionAdmin('plataformas');
-    }
     function cerrarAdmin() { 
         document.getElementById('vistaAdmin').classList.add('hidden'); 
         actualizarSelectorPublico(); 
