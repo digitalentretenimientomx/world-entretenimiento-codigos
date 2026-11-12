@@ -29,30 +29,42 @@ export default async function handler(req, res) {
             });
         }
 
-        let mejorCoincidencia = null;
+        // 1. Convertir los documentos a un arreglo estructurado y ordenarlos del más NUEVO al más ANTIGUO
+        const documentos = data.documents.map(doc => {
+            const fields = doc.fields || {};
+            return {
+                correo: fields.correo && fields.correo.stringValue ? fields.correo.stringValue.trim().toLowerCase() : "",
+                asunto: fields.asunto && fields.asunto.stringValue ? fields.asunto.stringValue.trim().toLowerCase() : "",
+                asuntoOriginal: fields.asunto && fields.asunto.stringValue ? fields.asunto.stringValue : "",
+                codigo: fields.codigo && fields.codigo.stringValue ? fields.codigo.stringValue : "------",
+                cuerpo: fields.cuerpo && fields.cuerpo.stringValue ? fields.cuerpo.stringValue : (fields.mensaje && fields.mensaje.stringValue ? fields.mensaje.stringValue : "Sin contenido detallado"),
+                fechaStr: fields.fecha && fields.fecha.stringValue ? fields.fecha.stringValue : "",
+                // Intentamos extraer una marca de tiempo válida para ordenar con precisión
+                timestamp: fields.fecha && fields.fecha.stringValue ? new Date(fields.fecha.stringValue).getTime() : 0
+            };
+        });
+
+        // Ordenar descendentemente (del más reciente al más antiguo)
+        documentos.sort((a, b) => b.timestamp - a.timestamp);
+
         const correoBuscado = correo.trim().toLowerCase();
         const asuntoBuscado = asunto ? asunto.trim().toLowerCase() : "";
 
-        // Recorremos todos los documentos para encontrar el que cumpla AMBAS condiciones de manera estricta
-        for (const doc of data.documents) {
-            const fields = doc.fields;
-            const correoDoc = fields.correo && fields.correo.stringValue ? fields.correo.stringValue.trim().toLowerCase() : "";
-            const asuntoDoc = fields.asunto && fields.asunto.stringValue ? fields.asunto.stringValue.trim().toLowerCase() : "";
+        let mejorCoincidencia = null;
 
-            // 1. Validar que el correo sea exactamente el mismo
-            if (correoDoc === correoBuscado) {
-                
-                // 2. Validar de forma estricta que el asunto del registro contenga o coincida con la plataforma seleccionada
-                const coincideAsunto = !asuntoBuscado || asuntoDoc.includes(asuntoBuscado) || asuntoBuscado.includes(asuntoDoc);
+        // 2. Buscar estrictamente el primer registro que coincida con el correo Y con el asunto de la plataforma
+        for (const item of documentos) {
+            if (item.correo === correoBuscado) {
+                const coincideAsunto = !asuntoBuscado || item.asunto.includes(asuntoBuscado) || asuntoBuscado.includes(item.asunto);
 
                 if (coincideAsunto) {
                     mejorCoincidencia = {
-                        codigo: fields.codigo ? fields.codigo.stringValue : "------",
-                        asunto: fields.asunto ? fields.asunto.stringValue : (asunto || "Verificación"),
-                        cuerpo: fields.cuerpo ? fields.cuerpo.stringValue : (fields.mensaje ? fields.mensaje.stringValue : "Sin contenido detallado"),
-                        fecha: fields.fecha ? fields.fecha.stringValue : "Reciente"
+                        codigo: item.codigo,
+                        asunto: item.asuntoOriginal,
+                        cuerpo: item.cuerpo,
+                        fecha: item.fechaStr || "Reciente"
                     };
-                    break; // Al estar ordenados o encontrar el primero válido correspondiente a esa plataforma, lo capturamos
+                    break; // Al estar ordenados por fecha, el primero que cumple ambas condiciones es el más reciente y exacto
                 }
             }
         }
@@ -65,7 +77,7 @@ export default async function handler(req, res) {
         } else {
             return res.status(200).json({ 
                 success: false, 
-                message: `No se encontró ningún correo para ${correo} con el asunto: "${asunto || 'Seleccionado'}".` 
+                message: `No se encontró ningún correo reciente para ${correo} con el asunto seleccionado.` 
             });
         }
 
