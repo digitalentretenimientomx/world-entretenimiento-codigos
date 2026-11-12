@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODE CODEX - Validador de Correo Matriz</title>
+    <title>World Entretenimiento Codex - Validador de Correo Matriz</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0b132b] text-white font-sans antialiased min-h-screen relative overflow-x-hidden flex flex-col justify-between">
 
     <!-- Fondo Matrix sutil -->
-    <div class="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden flex justify-around text-xs font-mono text-yellow-500">
+    <div class="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden flex justify-around text-xs font-mono text-orange-500">
         <div>2026 8735 9941 1029 4432<br>0192 8374 5561 2234 9980</div>
         <div>5541 2234 9980 2026 8735<br>9941 1029 4432 0192 8374</div>
     </div>
 
     <!-- HEADER -->
     <header class="relative z-10 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto w-full">
-        <div class="text-xl font-bold tracking-wider text-yellow-400 flex items-center gap-1">
-            CODE<span class="text-white">CODEX</span>
+        <div class="text-xl font-black tracking-wider flex flex-col leading-none">
+            <span class="text-white">WORLD</span>
+            <span class="text-[#ff6600]">ENTRETENIMIENTO</span>
         </div>
-        <button onclick="abrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-yellow-400 px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
+        <button onclick="abrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-[#ff6600] px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
             <span>🔑</span> Panel Admin
         </button>
     </header>
@@ -27,31 +28,35 @@
     <!-- WIDGET DE CONSULTA DIRECTA AL CORREO MATRIZ -->
     <main class="relative z-10 flex flex-col items-center justify-center px-4 my-auto">
         <div class="w-full max-w-xl bg-[#1c2541]/95 backdrop-blur-md border border-gray-700/80 rounded-2xl p-8 shadow-2xl space-y-6">
-            <h2 class="text-lg font-bold tracking-wide text-white uppercase text-center border-b border-gray-700 pb-4">
-                CONSULTA EN CORREO MATRIZ
-            </h2>
+            
+            <!-- Título Principal Estilo Referencia (Blanco y Naranja) -->
+            <div class="text-center border-b border-gray-700 pb-5">
+                <h1 class="text-3xl font-black tracking-tight leading-none text-white">WORLD</h1>
+                <h1 class="text-3xl font-black tracking-tight leading-none text-[#ff6600] mt-1">ENTRETENIMIENTO</h1>
+                <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest font-semibold">Codex — Matriz de Validación</p>
+            </div>
             
             <div class="space-y-4 text-left">
                 <div>
                     <label class="text-xs text-gray-400 mb-1 block">Selecciona la plataforma (Asunto):</label>
-                    <select id="selectPlataformaPublica" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-yellow-400">
+                    <select id="selectPlataformaPublica" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6600]">
                         <!-- Se llena dinámicamente -->
                     </select>
                 </div>
 
                 <div>
                     <label class="text-xs text-gray-400 mb-1 block">Correo del cliente a consultar:</label>
-                    <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
+                    <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-[#ff6600]/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#ff6600]">
                 </div>
 
-                <button onclick="consultarCorreoMatrizReal()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                <button onclick="consultarCorreoMatrizReal()" class="w-full bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
                     Buscar Último Código en Matriz
                 </button>
             </div>
 
             <!-- Loader de consulta en vivo -->
             <div id="loader-box" class="hidden text-center py-6">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-yellow-400 border-t-transparent"></div>
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#ff6600] border-t-transparent"></div>
                 <p class="text-xs text-gray-400 mt-2">Buscando en la bandeja de <code>codigosworld@gmail.com</code>...</p>
             </div>
 
@@ -62,11 +67,11 @@
 
     <!-- POPUP DE RESULTADO -->
     <div id="zmc-popup-overlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#1c2541] border border-yellow-500/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative">
+        <div class="bg-[#1c2541] border border-[#ff6600]/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative">
             <button onclick="cerrarPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
             
             <div class="flex items-center gap-2 border-b border-gray-700 pb-3">
-                <span class="text-yellow-400 text-xl">📩</span>
+                <span class="text-[#ff6600] text-xl">📩</span>
                 <div>
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">¡Código Encontrado en Matriz!</h3>
                     <p id="popupSubCorreo" class="text-xs text-gray-400"></p>
@@ -79,20 +84,20 @@
                     <p id="popupAsunto" class="text-xs text-white font-medium mt-0.5"></p>
                 </div>
 
-                <div class="flex justify-between items-center bg-[#0b132b] p-4 rounded-xl border border-yellow-500/30">
+                <div class="flex justify-between items-center bg-[#0b132b] p-4 rounded-xl border border-[#ff6600]/30">
                     <div>
-                        <span class="text-[10px] text-yellow-400 block uppercase font-bold">Fecha y Hora:</span>
+                        <span class="text-[10px] text-[#ff6600] block uppercase font-bold">Fecha y Hora:</span>
                         <p id="popupFecha" class="text-xs text-gray-300 font-mono mt-0.5"></p>
                     </div>
                     <div class="text-right">
                         <span class="text-[10px] text-gray-400 block uppercase font-bold">Código Extraído:</span>
-                        <span id="popupCodigo" class="text-2xl font-black text-yellow-400 tracking-wider"></span>
+                        <span id="popupCodigo" class="text-2xl font-black text-[#ff6600] tracking-wider"></span>
                     </div>
                 </div>
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button id="btnCopiarPopup" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg">
+                <button id="btnCopiarPopup" class="flex-1 bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg">
                     Copiar Código
                 </button>
                 <button onclick="cerrarPopup()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm">
@@ -102,17 +107,17 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="relative z-10 text-center py-6 text-xs text-gray-500">
-        World Entretenimiento & Code Codex | Matriz: codigosworld@gmail.com
+    <!-- FOOTER SOLICITADO -->
+    <footer class="relative z-10 text-center py-6 text-xs text-gray-400 font-medium">
+        Hecho por World Entretenimiento
     </footer>
 
     <!-- PANEL ADMINISTRATIVO -->
     <div id="vistaAdmin" class="hidden fixed inset-0 bg-[#0b132b] z-50 flex">
         <aside class="w-64 bg-[#1c2541] border-r border-gray-800 flex flex-col justify-between">
             <div>
-                <div class="p-6 text-xl font-bold tracking-wider text-yellow-400 flex items-center gap-2">
-                    CODE<span class="text-white">CODEX</span>
+                <div class="p-6 text-xl font-bold tracking-wider text-[#ff6600] flex items-center gap-2">
+                    WORLD<span class="text-white">CODEX</span>
                 </div>
                 <nav class="mt-6 space-y-1 px-4 text-sm">
                     <a href="#" onclick="cambiarSeccionAdmin('plataformas')" id="navPlataformas" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Plataformas y Asuntos</a>
@@ -131,10 +136,10 @@
             <div id="seccionAdminPlataformas" class="space-y-6">
                 <header class="flex justify-between items-center bg-[#1c2541] p-4 rounded-xl border border-gray-800">
                     <div>
-                        <h1 class="text-lg font-bold text-yellow-400">Gestión de Plataformas y Asuntos</h1>
+                        <h1 class="text-lg font-bold text-[#ff6600]">Gestión de Plataformas y Asuntos</h1>
                         <p class="text-xs text-gray-400">Define los asuntos que el sistema buscará en el correo matriz</p>
                     </div>
-                    <button onclick="abrirNuevaPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+                    <button onclick="abrirNuevaPlataforma()" class="bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
                         + Nueva Plataforma
                     </button>
                 </header>
@@ -153,13 +158,13 @@
                 </div>
 
                 <div id="seccionFormPlataforma" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
-                    <h3 id="formTitulo" class="text-lg font-bold text-yellow-400">Nueva Plataforma</h3>
+                    <h3 id="formTitulo" class="text-lg font-bold text-[#ff6600]">Nueva Plataforma</h3>
                     <div>
                         <label class="text-xs text-gray-400">Nombre de la Plataforma *</label>
-                        <input type="text" id="inputNombrePlat" placeholder="Ej: DISNEY+" class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                        <input type="text" id="inputNombrePlat" placeholder="Ej: DISNEY+" class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-[#ff6600]">
                     </div>
                     <div class="flex gap-3 pt-2">
-                        <button onclick="guardarPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-6 py-2 rounded-lg transition text-sm">Guardar</button>
+                        <button onclick="guardarPlataforma()" class="bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold px-6 py-2 rounded-lg transition text-sm">Guardar</button>
                         <button onclick="cancelarEdicion()" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg transition text-sm">Cancelar</button>
                     </div>
 
@@ -169,7 +174,7 @@
                             <button onclick="mostrarInputAsunto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">+ Agregar Asunto</button>
                         </div>
                         <div id="formAgregarAsunto" class="hidden flex gap-2 pt-1">
-                            <input type="text" id="inputNuevoAsunto" placeholder="Ej: Tu código de acceso único para Disney+" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow-400">
+                            <input type="text" id="inputNuevoAsunto" placeholder="Ej: Tu código de acceso único para Disney+" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ff6600]">
                             <button onclick="guardarAsunto()" class="bg-green-500 hover:bg-green-600 text-gray-950 font-bold px-4 py-1.5 rounded-lg text-xs">Guardar Asunto</button>
                         </div>
                         <div id="listaAsuntos" class="space-y-2 pt-1"></div>
@@ -179,13 +184,13 @@
 
             <!-- SECCIÓN: CONFIGURACIÓN DE URL DE CONEXIÓN AL CORREO MATRIZ -->
             <div id="seccionAdminConfig" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
-                <h1 class="text-lg font-bold text-yellow-400">Conexión con el Correo Matriz (API / Webhook)</h1>
-                <p class="text-xs text-gray-400">Correo matriz configurado: <strong class="text-yellow-400">codigosworld@gmail.com</strong></p>
+                <h1 class="text-lg font-bold text-[#ff6600]">Conexión con el Correo Matriz (API / Webhook)</h1>
+                <p class="text-xs text-gray-400">Correo matriz configurado: <strong class="text-[#ff6600]">codigosworld@gmail.com</strong></p>
                 <div>
                     <label class="text-xs text-gray-400 block mb-1">URL del Script de Conexión a Gmail (Google Apps Script):</label>
-                    <input type="text" id="inputWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-yellow-400">
+                    <input type="text" id="inputWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6600]">
                 </div>
-                <button onclick="guardarWebhookUrl()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-5 py-2.5 rounded-lg text-xs transition">Guardar URL de Conexión</button>
+                <button onclick="guardarWebhookUrl()" class="bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold px-5 py-2.5 rounded-lg text-xs transition">Guardar URL de Conexión</button>
                 <p class="text-xs text-gray-500 mt-2">Esta URL se encarga de consultar en tiempo real la bandeja de entrada de <code>codigosworld@gmail.com</code> sin necesidad de registrar códigos manualmente.</p>
             </div>
         </main>
@@ -348,7 +353,7 @@
                     <td class="py-4 px-6 font-bold">${plat.nombre}</td>
                     <td class="py-4 px-6"><span class="bg-blue-900/50 text-blue-300 text-xs px-2.5 py-1 rounded-full border border-blue-700">${plat.asuntos.length} asuntos</span></td>
                     <td class="py-4 px-6 text-right space-x-2">
-                        <button onclick="editarPlataforma(${plat.id})" class="text-gray-400 hover:text-yellow-400 transition" title="Editar">✏️</button>
+                        <button onclick="editarPlataforma(${plat.id})" class="text-gray-400 hover:text-[#ff6600] transition" title="Editar">✏️</button>
                         <button onclick="eliminarPlataforma(${plat.id})" class="text-gray-400 hover:text-red-400 transition" title="Eliminar">🗑️</button>
                     </td>
                 </tr>
