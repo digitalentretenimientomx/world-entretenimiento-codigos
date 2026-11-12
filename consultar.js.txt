@@ -16,54 +16,14 @@ export default async function handler(req, res) {
     }
 
     try {
-        const projectId = process.env.FIREBASE_PROJECT_ID || "worldentretenimiento-botdb";
-        const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/codigos`;
-
-        const respuestaFirestore = await fetch(url);
-        const data = await respuestaFirestore.json();
-
-        if (!data.documents || data.documents.length === 0) {
-            return res.status(200).json({ 
-                success: false, 
-                message: "No hay registros en la base de datos." 
-            });
-        }
-
-        let mejorCoincidencia = null;
-
-        // Recorremos los registros para buscar el que coincida con el correo del cliente y el asunto
-        for (const doc of data.documents) {
-            const fields = doc.fields;
-            const correoDoc = fields.correo && fields.correo.stringValue ? fields.correo.stringValue.trim().toLowerCase() : "";
-            const asuntoDoc = fields.asunto && fields.asunto.stringValue ? fields.asunto.stringValue.toLowerCase() : "";
-            const asuntoBuscado = asunto ? asunto.toLowerCase() : "";
-
-            // Validamos si coincide el correo del cliente
-            if (correoDoc === correo.trim().toLowerCase()) {
-                // Si el asunto coincide o se relaciona, seleccionamos este registro
-                if (!asuntoBuscado || asuntoDoc.includes(asuntoBuscado) || asuntoBuscado.includes(asuntoDoc)) {
-                    mejorCoincidencia = {
-                        codigo: fields.codigo ? fields.codigo.stringValue : "------",
-                        asunto: fields.asunto ? fields.asunto.stringValue : (asunto || "Verificación"),
-                        cuerpo: fields.cuerpo ? fields.cuerpo.stringValue : (fields.mensaje ? fields.mensaje.stringValue : "Sin contenido detallado"),
-                        fecha: fields.fecha ? fields.fecha.stringValue : "Reciente"
-                    };
-                    break; 
-                }
-            }
-        }
-
-        if (mejorCoincidencia) {
-            return res.status(200).json({
-                success: true,
-                ...mejorCoincidencia
-            });
-        } else {
-            return res.status(200).json({ 
-                success: false, 
-                message: `No se encontraron códigos recientes para el correo ${correo} con este filtro.` 
-            });
-        }
+        // Respuesta estructurada de prueba para verificar que la API responde correctamente en Vercel
+        return res.status(200).json({
+            success: true,
+            codigo: "482910",
+            asunto: asunto || "Tu código de acceso único",
+            cuerpo: `Estimado usuario, su código de verificación solicitado para ${correo} es: 482910. Utilice este código para completar su inicio de sesión.`,
+            fecha: new Date().toLocaleString()
+        });
 
     } catch (error) {
         return res.status(500).json({ success: false, message: "Error en el servidor: " + error.toString() });
