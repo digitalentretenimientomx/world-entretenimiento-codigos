@@ -79,7 +79,7 @@
             <div class="flex items-center gap-3 border-b border-gray-700 pb-3">
                 <span class="text-[#ff6600] text-2xl">📩</span>
                 <div>
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">¡Código Encontrado!</h3>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">¡Información Encontrada!</h3>
                     <p class="text-[11px] text-gray-400">Listo para entregar al cliente</p>
                 </div>
             </div>
@@ -90,21 +90,21 @@
                     <p id="popupAsunto" class="text-xs text-white font-medium mt-0.5"></p>
                 </div>
 
-                <div class="flex justify-between items-center bg-[#0b132b] p-4 rounded-xl border border-[#ff6600]/30">
-                    <div>
+                <div class="flex flex-col gap-2 bg-[#0b132b] p-4 rounded-xl border border-[#ff6600]/30">
+                    <div class="flex justify-between items-center">
                         <span class="text-[10px] text-[#ff6600] block uppercase font-bold">Fecha y Hora:</span>
                         <p id="popupFecha" class="text-xs text-gray-300 font-mono mt-0.5"></p>
                     </div>
-                    <div class="text-right">
-                        <span class="text-[10px] text-gray-400 block uppercase font-bold">Código Extraído:</span>
-                        <span id="popupCodigo" class="text-2xl font-black text-[#ff6600] tracking-wider"></span>
+                    <div>
+                        <span class="text-[10px] text-gray-400 block uppercase font-bold">Código o Enlace Extraído:</span>
+                        <div id="popupCodigo" class="text-sm font-bold text-[#ff6600] break-all mt-1 bg-black/30 p-2 rounded border border-gray-800"></div>
                     </div>
                 </div>
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button id="btnCopiarPopup" class="flex-1 bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg">
-                    Copiar Código
+                    Copiar
                 </button>
                 <button onclick="cerrarPopup()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm">
                     Cerrar
@@ -201,7 +201,7 @@
                             <button onclick="mostrarInputAsunto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">+ Agregar Asunto</button>
                         </div>
                         <div id="formAgregarAsunto" class="hidden flex gap-2 pt-1">
-                            <input type="text" id="inputNuevoAsunto" placeholder="Ej: Tu código de acceso único para Disney+" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ff6600]">
+                            <input type="text" id="inputNuevoAsunto" placeholder="Ej: Enlace para restablecer contraseña" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ff6600]">
                             <button onclick="guardarAsunto()" class="bg-green-500 hover:bg-green-600 text-gray-950 font-bold px-4 py-1.5 rounded-lg text-xs">Guardar Asunto</button>
                         </div>
                         <div id="listaAsuntos" class="space-y-2 pt-1"></div>
@@ -211,9 +211,9 @@
         </main>
     </div>
 
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- SCRIPT PRINCIPAL CON LA NUEVA URL FIJA -->
     <script>
-    const WEBHOOK_URL_FIJA = "https://script.google.com/macros/s/AKfycby3XxxRaZy78PT_EQhhoY_btuB1MQHld_YqIlpTbWbyF_jlpn-59JdU7jyI2Q8N7JCg/exec";
+    const WEBHOOK_URL_FIJA = "https://script.google.com/macros/s/AKfycbzI0XMyopoJAAqEp4lk5y8-Mr_5djAict485N3qFO1XvIRnCaYj4Lhosrfbhdz0XH_t/exec";
     const ADMIN_CORREO_VALIDO = "codigosworld@gmail.com";
     const ADMIN_PASS_VALIDO = "World2026*";
 
@@ -338,7 +338,7 @@
         document.getElementById('popupCodigo').innerText = obj.codigo;
         document.getElementById('btnCopiarPopup').onclick = () => {
             navigator.clipboard.writeText(obj.codigo);
-            alert(`¡Código ${obj.codigo} copiado!`);
+            alert(`¡Copiado al portapapeles!`);
         };
         document.getElementById('zmc-popup-overlay').classList.remove('hidden');
     }
@@ -423,7 +423,7 @@
         }
     }
 
-    function mostrarInputAsunto() { document.getElementById('formAgregarAsunto').classList.remove('hidden'); }
+    function mostrarInputAsunto() { document.getElementById('form` + `AgregarAsunto').classList.remove('hidden'); }
 
     function guardarAsunto() {
         const nuevoAsunto = document.getElementById('inputNuevoAsunto').value.trim();
