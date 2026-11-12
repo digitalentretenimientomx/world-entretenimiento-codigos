@@ -25,21 +25,26 @@ export default async function handler(req, res) {
         if (!data.documents || data.documents.length === 0) {
             return res.status(200).json({ 
                 success: false, 
-                message: "La base de datos está conectada pero no devolvió ningún documento." 
+                message: "No hay registros guardados en la base de datos." 
             });
         }
 
         const correoBuscado = correo.trim().toLowerCase();
-        const asuntoBuscado = asunto ? asunto.trim().toLowerCase() : "";
+        
+        // Limpiamos el texto del asunto recibido para extraer solo la parte clave entre paréntesis o usar palabras clave
+        let filtroAsunto = asunto ? asunto.trim().toLowerCase() : "";
+        if (filtroAsunto.includes("-")) {
+            // Si viene con formato "PLATAFORMA - (Asunto)", extraemos lo que está dentro del paréntesis o la parte clave
+            const partes = filtroAsunto.split("-");
+            filtroAsunto = partes[partes.length - 1].replace(/[()]/g, "").trim();
+        }
 
-        let registrosDelCorreo = [];
         let mejorCoincidencia = null;
+        let registrosLeidos = [];
 
-        // Recorremos todos los documentos
         for (const doc of data.documents) {
             const fields = doc.fields || {};
             
-            // Extraemos los posibles nombres de campos que use su base de datos
             const correoDoc = (fields.correo?.stringValue || fields.email?.stringValue || "").trim().toLowerCase();
             const asuntoDoc = (fields.asunto?.stringValue || fields.subject?.stringValue || fields.titulo?.stringValue || "").trim().toLowerCase();
             const asuntoOriginal = fields.asunto?.stringValue || fields.subject?.stringValue || fields.titulo?.stringValue || "Sin Asunto";
@@ -49,10 +54,10 @@ export default async function handler(req, res) {
             const timestamp = fields.fecha?.stringValue ? new Date(fields.fecha.stringValue).getTime() : 0;
 
             if (correoDoc === correoBuscado) {
-                registrosDelCorreo.push({ asuntoDoc, asuntoOriginal, timestamp });
+                registrosLeidos.push(asuntoOriginal);
 
-                // Verificamos si coincide el asunto (flexible para evitar falsos negativos por espacios o minúsculas)
-                const coincideAsunto = !asuntoBuscado || asuntoDoc.includes(asuntoBuscado) || asuntoBuscado.includes(asuntoDoc);
+                // Verificación flexible pero estricta de palabras clave del asunto
+                const coincideAsunto = !filtroAsunto || asuntoDoc.includes(filtroAsunto) || filtroAsunto.includes(asuntoDoc);
 
                 if (coincideAsunto) {
                     if (!mejorCoincidencia || timestamp >= mejorCoincidencia.timestamp) {
@@ -77,10 +82,9 @@ export default async function handler(req, res) {
                 fecha: mejorCoincidencia.fecha
             });
         } else {
-            // Si no encontró coincidencia de asunto, devolvemos los asuntos que SÍ encontró para este correo en el mensaje de error
             return res.status(200).json({ 
                 success: false, 
-                message: `Correos encontrados para ${correo}, pero ninguno coincide con "${asunto}". Asuntos en BD: [${registrosDelCorreo.map(r => r.asuntoOriginal).join(" | ")}]` 
+                message: `No se encontró coincidencia para "${filtroAsunto}". Correos de este usuario en BD: [${registrosLeidos.join(" | ")}]` 
             });
         }
 
