@@ -25,46 +25,45 @@ export default async function handler(req, res) {
         if (!data.documents || data.documents.length === 0) {
             return res.status(200).json({ 
                 success: false, 
-                message: "No hay registros guardados en la base de datos." 
+                message: "La base de datos está conectada pero no devolvió ningún documento." 
             });
         }
-
-        // 1. Convertir los documentos a un arreglo estructurado y ordenarlos del más NUEVO al más ANTIGUO
-        const documentos = data.documents.map(doc => {
-            const fields = doc.fields || {};
-            return {
-                correo: fields.correo && fields.correo.stringValue ? fields.correo.stringValue.trim().toLowerCase() : "",
-                asunto: fields.asunto && fields.asunto.stringValue ? fields.asunto.stringValue.trim().toLowerCase() : "",
-                asuntoOriginal: fields.asunto && fields.asunto.stringValue ? fields.asunto.stringValue : "",
-                codigo: fields.codigo && fields.codigo.stringValue ? fields.codigo.stringValue : "------",
-                cuerpo: fields.cuerpo && fields.cuerpo.stringValue ? fields.cuerpo.stringValue : (fields.mensaje && fields.mensaje.stringValue ? fields.mensaje.stringValue : "Sin contenido detallado"),
-                fechaStr: fields.fecha && fields.fecha.stringValue ? fields.fecha.stringValue : "",
-                // Intentamos extraer una marca de tiempo válida para ordenar con precisión
-                timestamp: fields.fecha && fields.fecha.stringValue ? new Date(fields.fecha.stringValue).getTime() : 0
-            };
-        });
-
-        // Ordenar descendentemente (del más reciente al más antiguo)
-        documentos.sort((a, b) => b.timestamp - a.timestamp);
 
         const correoBuscado = correo.trim().toLowerCase();
         const asuntoBuscado = asunto ? asunto.trim().toLowerCase() : "";
 
+        let registrosDelCorreo = [];
         let mejorCoincidencia = null;
 
-        // 2. Buscar estrictamente el primer registro que coincida con el correo Y con el asunto de la plataforma
-        for (const item of documentos) {
-            if (item.correo === correoBuscado) {
-                const coincideAsunto = !asuntoBuscado || item.asunto.includes(asuntoBuscado) || asuntoBuscado.includes(item.asunto);
+        // Recorremos todos los documentos
+        for (const doc of data.documents) {
+            const fields = doc.fields || {};
+            
+            // Extraemos los posibles nombres de campos que use su base de datos
+            const correoDoc = (fields.correo?.stringValue || fields.email?.stringValue || "").trim().toLowerCase();
+            const asuntoDoc = (fields.asunto?.stringValue || fields.subject?.stringValue || fields.titulo?.stringValue || "").trim().toLowerCase();
+            const asuntoOriginal = fields.asunto?.stringValue || fields.subject?.stringValue || fields.titulo?.stringValue || "Sin Asunto";
+            const codigo = fields.codigo?.stringValue || fields.code?.stringValue || "------";
+            const cuerpo = fields.cuerpo?.stringValue || fields.mensaje?.stringValue || fields.body?.stringValue || "Sin contenido detallado";
+            const fechaStr = fields.fecha?.stringValue || fields.date?.stringValue || "Reciente";
+            const timestamp = fields.fecha?.stringValue ? new Date(fields.fecha.stringValue).getTime() : 0;
+
+            if (correoDoc === correoBuscado) {
+                registrosDelCorreo.push({ asuntoDoc, asuntoOriginal, timestamp });
+
+                // Verificamos si coincide el asunto (flexible para evitar falsos negativos por espacios o minúsculas)
+                const coincideAsunto = !asuntoBuscado || asuntoDoc.includes(asuntoBuscado) || asuntoBuscado.includes(asuntoDoc);
 
                 if (coincideAsunto) {
-                    mejorCoincidencia = {
-                        codigo: item.codigo,
-                        asunto: item.asuntoOriginal,
-                        cuerpo: item.cuerpo,
-                        fecha: item.fechaStr || "Reciente"
-                    };
-                    break; // Al estar ordenados por fecha, el primero que cumple ambas condiciones es el más reciente y exacto
+                    if (!mejorCoincidencia || timestamp >= mejorCoincidencia.timestamp) {
+                        mejorCoincidencia = {
+                            codigo,
+                            asunto: asuntoOriginal,
+                            cuerpo,
+                            fecha: fechaStr,
+                            timestamp
+                        };
+                    }
                 }
             }
         }
@@ -72,16 +71,20 @@ export default async function handler(req, res) {
         if (mejorCoincidencia) {
             return res.status(200).json({
                 success: true,
-                ...mejorCoincidencia
+                codigo: mejorCoincidencia.codigo,
+                asunto: mejorCoincidencia.asunto,
+                cuerpo: mejorCoincidencia.cuerpo,
+                fecha: mejorCoincidencia.fecha
             });
         } else {
+            // Si no encontró coincidencia de asunto, devolvemos los asuntos que SÍ encontró para este correo en el mensaje de error
             return res.status(200).json({ 
                 success: false, 
-                message: `No se encontró ningún correo reciente para ${correo} con el asunto seleccionado.` 
+                message: `Correos encontrados para ${correo}, pero ninguno coincide con "${asunto}". Asuntos en BD: [${registrosDelCorreo.map(r => r.asuntoOriginal).join(" | ")}]` 
             });
         }
 
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Error al consultar la base de datos: " + error.toString() });
+        return res.status(500).json({ success: false, message: "Error al consultar: " + error.toString() });
     }
 }
