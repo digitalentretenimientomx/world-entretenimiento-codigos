@@ -1,5 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/api/consultar", "destination": "/api/consultar.js" }
-  ]
-}
