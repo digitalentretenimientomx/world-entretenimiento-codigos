@@ -297,7 +297,6 @@
     }
 
     window.onload = () => {
-        const savedUrl = localStorage.getItem('world_webhook_url'] || ""; // Nota: asegurar almacenamiento correcto
         const storedUrl = localStorage.getItem('world_webhook_url') || "";
         const inputUrl = document.getElementById('inputWebhookUrl');
         if(inputUrl) inputUrl.value = storedUrl;
@@ -311,8 +310,13 @@
         cargarPlataformasCloud(true);
     }
 
-    function intentarAbrirAdmin() { document.getElementById('modalLoginAdmin').classList.remove('hidden'); }
-    function cerrarLoginAdmin() { document.getElementById('modalLoginAdmin').classList.add('hidden'); }
+    function intentarAbrirAdmin() { 
+        document.getElementById('modalLoginAdmin').classList.remove('hidden'); 
+    }
+
+    function cerrarLoginAdmin() { 
+        document.getElementById('modalLoginAdmin').classList.add('hidden'); 
+    }
 
     function verificarCredencialesAdmin() {
         const emailIngresado = document.getElementById('inputAdminEmail').value.trim().toLowerCase();
