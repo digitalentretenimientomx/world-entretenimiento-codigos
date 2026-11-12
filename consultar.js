@@ -20,6 +20,11 @@ export default async function handler(req, res) {
         const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/codigos`;
 
         const respuestaFirestore = await fetch(url);
+        
+        if (!respuestaFirestore.ok) {
+            throw new Error("No se pudo conectar con la base de datos de Firestore.");
+        }
+
         const data = await respuestaFirestore.json();
 
         if (!data.documents || data.documents.length === 0) {
@@ -30,14 +35,7 @@ export default async function handler(req, res) {
         }
 
         const correoBuscado = correo.trim().toLowerCase();
-        
-        // Limpiamos el texto del asunto recibido para extraer solo la parte clave entre paréntesis o usar palabras clave
-        let filtroAsunto = asunto ? asunto.trim().toLowerCase() : "";
-        if (filtroAsunto.includes("-")) {
-            // Si viene con formato "PLATAFORMA - (Asunto)", extraemos lo que está dentro del paréntesis o la parte clave
-            const partes = filtroAsunto.split("-");
-            filtroAsunto = partes[partes.length - 1].replace(/[()]/g, "").trim();
-        }
+        const asuntoBuscado = asunto ? asunto.trim().toLowerCase() : "";
 
         let mejorCoincidencia = null;
         let registrosLeidos = [];
@@ -56,8 +54,7 @@ export default async function handler(req, res) {
             if (correoDoc === correoBuscado) {
                 registrosLeidos.push(asuntoOriginal);
 
-                // Verificación flexible pero estricta de palabras clave del asunto
-                const coincideAsunto = !filtroAsunto || asuntoDoc.includes(filtroAsunto) || filtroAsunto.includes(asuntoDoc);
+                const coincideAsunto = !asuntoBuscado || asuntoDoc.includes(asuntoBuscado) || asuntoBuscado.includes(asuntoDoc);
 
                 if (coincideAsunto) {
                     if (!mejorCoincidencia || timestamp >= mejorCoincidencia.timestamp) {
@@ -84,11 +81,14 @@ export default async function handler(req, res) {
         } else {
             return res.status(200).json({ 
                 success: false, 
-                message: `No se encontró coincidencia para "${filtroAsunto}". Correos de este usuario en BD: [${registrosLeidos.join(" | ")}]` 
+                message: `No se encontró coincidencia para el asunto seleccionado. Registros del usuario en BD: [${registrosLeidos.join(" | ")}]` 
             });
         }
 
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Error al consultar: " + error.toString() });
+        return res.status(200).json({ 
+            success: false, 
+            message: "Error en el servidor: " + error.toString() 
+        });
     }
 }
