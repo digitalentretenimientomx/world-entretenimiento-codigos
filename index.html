@@ -42,7 +42,7 @@
                         <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <button onclick="ejecutarBusquedaDefinitiva()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                    <button onclick="buscarUltimoCodigoReal()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
                         Buscar el Último Código Recibido
                     </button>
                 </div>
@@ -66,7 +66,7 @@
                 </div>
                 <nav class="mt-6 space-y-1 px-4 text-sm">
                     <a href="#" onclick="cambiarSeccionAdmin('plataformas')" id="navPlataformas" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Plataformas y Asuntos</a>
-                    <a href="#" onclick="cambiarSeccionAdmin('configuracion')" id="navConfig" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Correo Matriz</a>
+                    <a href="#" onclick="cambiarSeccionAdmin('configuracion')" id="navConfig" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Correo Matriz y Registros</a>
                     <a href="#" onclick="cerrarAdmin()" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">← Volver al sitio público</a>
                 </nav>
             </div>
@@ -127,19 +127,26 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: CONFIGURACIÓN DE CORREO MATRIZ -->
+            <!-- SECCIÓN: CONFIGURACIÓN DE CORREO MATRIZ Y REGISTROS DE PRUEBA -->
             <div id="seccionAdminConfig" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
                 <h1 class="text-lg font-bold text-yellow-400">Configuración del Correo Matriz</h1>
                 <p class="text-xs text-gray-400">Correo principal configurado donde llega todo:</p>
                 <div>
                     <input type="email" id="inputCorreoMatrizConfig" value="codigosworld@gmail.com" readonly class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-3 text-sm text-yellow-400 font-bold focus:outline-none">
                 </div>
-                <p class="text-xs text-gray-500">Este es el correo matriz oficial del sistema de distribución.</p>
+                <div class="pt-4 border-t border-gray-700 space-y-2">
+                    <h2 class="text-sm font-bold text-white">Simulador / Gestor de Correos en Matriz</h2>
+                    <p class="text-xs text-gray-400">Agrega un correo de prueba con un código específico para verificar que el sistema lo encuentre y ordene por hora:</p>
+                    <input type="text" id="simCorreo" placeholder="Correo del cliente" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
+                    <input type="text" id="simAsunto" placeholder="Asunto exacto" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
+                    <input type="text" id="simCodigo" placeholder="Código (ej: 998877)" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white mb-2">
+                    <button onclick="agregarCorreoSimulado()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Simular Entrada de Correo a Matriz</button>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Script General con Normalización de Textos y Coincidencia Flexible -->
+    <!-- Script General con Búsqueda Real y Ordenamiento por Timestamp -->
     <script>
     const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
 
@@ -171,11 +178,47 @@
         actualizarSelectorPublico();
         const inputMatriz = document.getElementById('inputCorreoMatrizConfig');
         if(inputMatriz) inputMatriz.value = CORREO_MATRIZ_OFICIAL;
+
+        // Inicializar bandeja matriz con un registro base si está vacía
+        if (!localStorage.getItem('world_matriz_correos')) {
+            const baseInicial = [
+                { matriz: CORREO_MATRIZ_OFICIAL, correo: "danae0973904@gmail.com", asunto: "Tu código de acceso único para Disney+", codigo: "123456", fechaHora: "10/11/2026, 8:00:00 a. m.", timestamp: 1794400000000 },
+                { matriz: CORREO_MATRIZ_OFICIAL, correo: "danae0973904@gmail.com", asunto: "Tu código de acceso único para Disney+", codigo: "998877", fechaHora: new Date().toLocaleString(), timestamp: new Date().getTime() }
+            ];
+            localStorage.setItem('world_matriz_correos', JSON.stringify(baseInicial));
+        }
     };
 
-    function ejecutarBusquedaDefinitiva() {
+    function agregarCorreoSimulado() {
+        const c = document.getElementById('simCorreo').value.trim().toLowerCase();
+        const a = document.getElementById('simAsunto').value.trim();
+        const cod = document.getElementById('simCodigo').value.trim();
+
+        if(!c || !a || !cod) {
+            alert("Llena todos los campos para simular el correo.");
+            return;
+        }
+
+        let bandeja = JSON.parse(localStorage.getItem('world_matriz_correos')) || [];
+        bandeja.push({
+            matriz: CORREO_MATRIZ_OFICIAL,
+            correo: c,
+            asunto: a,
+            codigo: cod,
+            fechaHora: new Date().toLocaleString(),
+            timestamp: new Date().getTime() // Marca de tiempo actual para que sea el más reciente
+        });
+
+        localStorage.setItem('world_matriz_correos', JSON.stringify(bandeja));
+        alert("¡Correo simulado agregado a la matriz correctamente con hora actual!");
+        document.getElementById('simCorreo').value = "";
+        document.getElementById('simAsunto').value = "";
+        document.getElementById('simCodigo').value = "";
+    }
+
+    function buscarUltimoCodigoReal() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
-        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim().toLowerCase();
+        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim();
         const contenedor = document.getElementById('resultadoPublico');
 
         if (!correoCliente) {
@@ -191,16 +234,9 @@
         contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL}</b> el correo de <b>${correoCliente}</b>...</div>`;
 
         setTimeout(() => {
-            let bandejaMatriz = JSON.parse(localStorage.getItem('world_matriz_correos'));
-            
-            if (!bandejaMatriz) {
-                bandejaMatriz = [
-                    { matriz: CORREO_MATRIZ_OFICIAL, correo: "danae0973904@gmail.com", asunto: "Tu código de acceso único para Disney+", codigo: "839201", fechaHora: new Date().toLocaleString(), timestamp: new Date().getTime() }
-                ];
-                localStorage.setItem('world_matriz_correos', JSON.stringify(bandejaMatriz));
-            }
+            const bandejaMatriz = JSON.parse(localStorage.getItem('world_matriz_correos')) || [];
 
-            // FILTRADO BLINDADO: Normaliza todo a minúsculas para evitar conflictos de mayúsculas/minúsculas
+            // Filtrar de manera exacta cruzando Matriz, Correo del cliente y Asunto
             const filtrados = bandejaMatriz.filter(item => {
                 const matrizItem = (item.matriz || "").trim().toLowerCase();
                 const correoItem = (item.correo || "").trim().toLowerCase();
@@ -208,7 +244,7 @@
 
                 const matchMatriz = matrizItem === CORREO_MATRIZ_OFICIAL.toLowerCase();
                 const matchCorreo = correoItem === correoCliente;
-                const matchAsunto = asuntoItem.includes(asuntoSeleccionado) || asuntoSeleccionado.includes(asuntoItem);
+                const matchAsunto = asuntoItem === asuntoSeleccionado.toLowerCase() || asuntoItem.includes(asuntoSeleccionado.toLowerCase());
 
                 return matchMatriz && matchCorreo && matchAsunto;
             });
@@ -216,21 +252,22 @@
             if (filtrados.length === 0) {
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                        No se encontró ningún correo en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con el asunto seleccionado.
+                        No se encontró ningún correo en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con este asunto.<br>
+                        <span class='text-xs text-gray-400 mt-1 block'>Consejo: Puedes ir al Panel Admin -> Correo Matriz y simular la entrada de un correo con su código para probar.</span>
                     </div>
                 `;
                 return;
             }
 
-            // ORDENAMIENTO POR HORA Y FECHA (Descendente: del más nuevo al más antiguo)
+            // ORDENAMIENTO CRONOLÓGICO ESTRICTO: Del más nuevo al más antiguo por fecha y hora (timestamp descendente)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
-            const ultimoCorreo = filtrados[0];
+            const ultimoCorreo = filtrados[0]; // Tomamos rigurosamente el último en llegar
 
             contenedor.innerHTML = `
                 <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl'>
                     <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
                         <div>
-                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo recibido en Matriz!</span>
+                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo recibido en Matriz (Más reciente)!</span>
                             <h3 class='text-white font-bold text-base mt-1'>${ultimoCorreo.asunto}</h3>
                             <p class='text-xs text-gray-400 mt-0.5'>Matriz: <strong>${CORREO_MATRIZ_OFICIAL}</strong> → Cliente: ${ultimoCorreo.correo}</p>
                             <p class='text-xs text-yellow-400 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${ultimoCorreo.fechaHora}</p>
@@ -243,7 +280,7 @@
                     <div class='space-y-1.5'>
                         <label class='text-xs text-gray-400 font-medium'>Detalle del Registro:</label>
                         <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            Se ha localizado el mensaje más reciente ingresado en la bandeja matriz oficial ${CORREO_MATRIZ_OFICIAL} para el cliente ${ultimoCorreo.correo} bajo el asunto exacto.
+                            Se ha localizado con éxito el mensaje más reciente ingresado en la bandeja matriz oficial ${CORREO_MATRIZ_OFICIAL} para el cliente ${ultimoCorreo.correo}.
                         </div>
                     </div>
 
@@ -363,7 +400,7 @@
 
         const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
         if (plat) {
-            plat.asuntos.includes(nuevoAsunto) || plat.asuntos.push(nuevoAsunto);
+            plat.asuntos.push(nuevoAsunto);
             guardarEnStorage();
             renderizarAsuntosAdmin(plat);
             document.getElementById('inputNuevoAsunto').value = "";
