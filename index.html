@@ -20,9 +20,14 @@
             <span class="text-white">WORLD</span>
             <span class="text-[#ff6600]">ENTRETENIMIENTO</span>
         </div>
-        <button onclick="intentarAbrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-[#ff6600] px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
-            <span>🔑</span> Panel Admin
-        </button>
+        <div class="flex items-center gap-3">
+            <button onclick="cargarPlataformasCloud(true)" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-gray-300 px-3 py-2 rounded-lg text-xs font-medium transition flex items-center gap-1.5" title="Sincronizar datos de la nube">
+                🔄 Sincronizar
+            </button>
+            <button onclick="intentarAbrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-[#ff6600] px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
+                <span>🔑</span> Panel Admin
+            </button>
+        </div>
     </header>
 
     <!-- WIDGET DE CONSULTA -->
@@ -221,7 +226,7 @@
     let plataformasData = [];
     let plataformaEnEdicionId = null;
 
-    function cargarPlataformasCloud() {
+    function cargarPlataformasCloud(mostrarAlerta = false) {
         const webhookUrl = localStorage.getItem('world_webhook_url');
         if (!webhookUrl) {
             plataformasData = [
@@ -230,25 +235,29 @@
                 { id: 3, nombre: "MAX", asuntos: ["Tu código de verificación de Max"] }
             ];
             actualizarSelectorPublico();
+            if(mostrarAlerta) alert("⚠️ Configura primero la URL del Webhook en el Panel Admin.");
             return;
         }
 
-        fetch(`${webhookUrl}?action=obtenerPlataformas`, { method: 'GET', mode: 'cors' })
+        fetch(`${webhookUrl}?action=obtenerPlataformas&t=${Date.now()}`, { method: 'GET', mode: 'cors' })
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
                     plataformasData = data;
                     actualizarSelectorPublico();
+                    if(mostrarAlerta) alert("¡Datos sincronizados correctamente desde la nube!");
                 }
             })
-            .catch(err => console.error("Error cargando:", err));
+            .catch(err => {
+                console.error("Error cargando:", err);
+                if(mostrarAlerta) alert("Error al sincronizar con la nube.");
+            });
     }
 
     function sincronizarPlataformasCloud() {
         const webhookUrl = localStorage.getItem('world_webhook_url');
         if (!webhookUrl) return;
 
-        // Truco con un formulario oculto para evitar restricciones CORS de los navegadores
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = webhookUrl;
@@ -288,9 +297,10 @@
     }
 
     window.onload = () => {
-        const savedUrl = localStorage.getItem('world_webhook_url') || "";
+        const savedUrl = localStorage.getItem('world_webhook_url'] || ""; // Nota: asegurar almacenamiento correcto
+        const storedUrl = localStorage.getItem('world_webhook_url') || "";
         const inputUrl = document.getElementById('inputWebhookUrl');
-        if(inputUrl) inputUrl.value = savedUrl;
+        if(inputUrl) inputUrl.value = storedUrl;
         cargarPlataformasCloud();
     };
 
@@ -298,7 +308,7 @@
         const url = document.getElementById('inputWebhookUrl').value.trim();
         localStorage.setItem('world_webhook_url', url);
         alert("¡URL guardada correctamente! Sincronizando...");
-        cargarPlataformasCloud();
+        cargarPlataformasCloud(true);
     }
 
     function intentarAbrirAdmin() { document.getElementById('modalLoginAdmin').classList.remove('hidden'); }
