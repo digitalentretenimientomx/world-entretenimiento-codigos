@@ -104,19 +104,17 @@
         </div>
     </div>
 
-    <!-- MODAL DE LOGIN ADMIN -->
+    <!-- MODAL LOGIN ADMIN -->
     <div id="modalLoginAdmin" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-[#1c2541] border border-[#ff6600]/60 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 relative">
             <button onclick="cerrarLoginAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
-            
             <div class="text-center pb-2 border-b border-gray-700">
                 <h3 class="text-base font-bold text-[#ff6600] uppercase tracking-wider">Acceso Administrativo</h3>
-                <p class="text-xs text-gray-400 mt-1">Introduce tus credenciales de seguridad</p>
+                <p class="text-xs text-gray-400 mt-1">Introduce tus credenciales</p>
             </div>
-
             <div class="space-y-3 text-left">
                 <div>
-                    <label class="text-xs text-gray-400 mb-1 block">Correo de Administrador:</label>
+                    <label class="text-xs text-gray-400 mb-1 block">Correo:</label>
                     <input type="email" id="inputAdminEmail" placeholder="codigosworld@gmail.com" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#ff6600]">
                 </div>
                 <div>
@@ -135,7 +133,7 @@
         Hecho por World Entretenimiento
     </footer>
 
-    <!-- PANEL ADMINISTRATIVO -->
+    <!-- PANEL ADMIN -->
     <div id="vistaAdmin" class="hidden fixed inset-0 bg-[#0b132b] z-50 flex">
         <aside class="w-64 bg-[#1c2541] border-r border-gray-800 flex flex-col justify-between">
             <div>
@@ -154,7 +152,6 @@
         </aside>
 
         <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8 space-y-6">
-            
             <div id="seccionAdminPlataformas" class="space-y-6">
                 <header class="flex justify-between items-center bg-[#1c2541] p-4 rounded-xl border border-gray-800">
                     <div>
@@ -206,9 +203,9 @@
 
             <div id="seccionAdminConfig" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
                 <h1 class="text-lg font-bold text-[#ff6600]">Conexión con el Correo Matriz (API / Webhook)</h1>
-                <p class="text-xs text-gray-400">Correo matriz configurado: <strong class="text-[#ff6600]">codigosworld@gmail.com</strong></p>
+                <p class="text-xs text-gray-400">Correo matriz: <strong class="text-[#ff6600]">codigosworld@gmail.com</strong></p>
                 <div>
-                    <label class="text-xs text-gray-400 block mb-1">URL del Script de Conexión a Gmail (Google Apps Script):</label>
+                    <label class="text-xs text-gray-400 block mb-1">URL del Script:</label>
                     <input type="text" id="inputWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6600]">
                 </div>
                 <button onclick="guardarWebhookUrl()" class="bg-[#ff6600] hover:bg-[#e05b00] text-gray-950 font-bold px-5 py-2.5 rounded-lg text-xs transition">Guardar URL de Conexión</button>
@@ -216,9 +213,8 @@
         </main>
     </div>
 
-    <!-- SCRIPT PRINCIPAL CON SINCRONIZACIÓN CLOUD -->
+    <!-- SCRIPT PRINCIPAL -->
     <script>
-    const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
     const ADMIN_CORREO_VALIDO = "codigosworld@gmail.com";
     const ADMIN_PASS_VALIDO = "World2026*";
 
@@ -245,24 +241,39 @@
                     actualizarSelectorPublico();
                 }
             })
-            .catch(err => console.error("Error cargando plataformas:", err));
+            .catch(err => console.error("Error cargando:", err));
     }
 
     function sincronizarPlataformasCloud() {
         const webhookUrl = localStorage.getItem('world_webhook_url');
-        if (!webhookUrl) {
-            actualizarSelectorPublico();
-            return;
+        if (!webhookUrl) return;
+
+        // Truco con un formulario oculto para evitar restricciones CORS de los navegadores
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = webhookUrl;
+        form.target = 'hidden_iframe';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = JSON.stringify({ plataformas: plataformasData });
+
+        form.appendChild(input);
+
+        let iframe = document.getElementById('hidden_iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.name = 'hidden_iframe';
+            iframe.id = 'hidden_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
         }
 
-        fetch(webhookUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ plataformas: plataformasData })
-        }).then(() => {
-            actualizarSelectorPublico();
-        }).catch(err => console.error("Error sincronizando:", err));
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+        actualizarSelectorPublico();
     }
 
     function actualizarSelectorPublico() {
@@ -286,17 +297,12 @@
     function guardarWebhookUrl() {
         const url = document.getElementById('inputWebhookUrl').value.trim();
         localStorage.setItem('world_webhook_url', url);
-        alert("¡URL de conexión guardada correctamente! Sincronizando...");
+        alert("¡URL guardada correctamente! Sincronizando...");
         cargarPlataformasCloud();
     }
 
-    function intentarAbrirAdmin() {
-        document.getElementById('modalLoginAdmin').classList.remove('hidden');
-    }
-
-    function cerrarLoginAdmin() {
-        document.getElementById('modalLoginAdmin').classList.add('hidden');
-    }
+    function intentarAbrirAdmin() { document.getElementById('modalLoginAdmin').classList.remove('hidden'); }
+    function cerrarLoginAdmin() { document.getElementById('modalLoginAdmin').classList.add('hidden'); }
 
     function verificarCredencialesAdmin() {
         const emailIngresado = document.getElementById('inputAdminEmail').value.trim().toLowerCase();
@@ -310,7 +316,7 @@
             cargarPlataformasCloud();
             cambiarSeccionAdmin('plataformas');
         } else {
-            alert("Acceso denegado. Correo o contraseña incorrectos.");
+            alert("Acceso denegado. Credenciales incorrectas.");
         }
     }
 
@@ -321,46 +327,37 @@
         const messageBox = document.getElementById('email-checker-message');
         const webhookUrl = localStorage.getItem('world_webhook_url');
 
-        if (!correoCliente) { alert("Por favor, ingresa el correo del cliente."); return; }
-        if (!asuntoSeleccionado) { alert("Por favor, selecciona un asunto válido."); return; }
-
-        if (!webhookUrl) {
-            messageBox.innerHTML = `<div class='p-4 mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-xs'>⚠️ Configura la URL del Webhook en el Panel Admin.</div>`;
-            return;
-        }
+        if (!correoCliente) { alert("Ingresa el correo del cliente."); return; }
+        if (!asuntoSeleccionado) { alert("Selecciona un asunto válido."); return; }
+        if (!webhookUrl) { messageBox.innerHTML = `<div class='p-4 mt-4 bg-yellow-500/10 rounded-xl text-yellow-400 text-xs'>⚠️ Configura la URL del Webhook en el Panel Admin.</div>`; return; }
 
         loaderBox.classList.remove('hidden');
         messageBox.innerHTML = "";
 
-        const urlConsulta = `${webhookUrl}?correo=${encodeURIComponent(correoCliente)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`;
-
-        fetch(urlConsulta, { method: 'GET', mode: 'cors' })
-            .then(response => response.json())
+        fetch(`${webhookUrl}?correo=${encodeURIComponent(correoCliente)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`, { method: 'GET', mode: 'cors' })
+            .then(res => res.json())
             .then(data => {
                 loaderBox.classList.add('hidden');
                 if (data.encontrado && data.codigo) {
                     abrirPopupResultado({ asunto: asuntoSeleccionado, codigo: data.codigo, fechaHora: data.fechaHora || new Date().toLocaleString() });
                 } else {
-                    messageBox.innerHTML = `<div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs'>No se encontró ningún correo reciente en la matriz.</div>`;
+                    messageBox.innerHTML = `<div class='p-4 mt-4 bg-red-500/10 rounded-xl text-red-400 text-xs'>No se encontró ningún correo reciente en la matriz.</div>`;
                 }
             })
             .catch(() => {
                 loaderBox.classList.add('hidden');
-                messageBox.innerHTML = `<div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs text-center'>Error de conexión con Google Apps Script.</div>`;
+                messageBox.innerHTML = `<div class='p-4 mt-4 bg-red-500/10 rounded-xl text-red-400 text-xs text-center'>Error de conexión con Google Apps Script.</div>`;
             });
     }
 
-    function abrirPopupResultado(correoObj) {
-        document.getElementById('popupAsunto').innerText = correoObj.asunto;
-        document.getElementById('popupFecha').innerText = correoObj.fechaHora;
-        document.getElementById('popupCodigo').innerText = correoObj.codigo;
-        
-        const btnCopiar = document.getElementById('btnCopiarPopup');
-        btnCopiar.onclick = () => {
-            navigator.clipboard.writeText(correoObj.codigo);
-            alert(`¡Código ${correoObj.codigo} copiado al portapapeles!`);
+    function abrirPopupResultado(obj) {
+        document.getElementById('popupAsunto').innerText = obj.asunto;
+        document.getElementById('popupFecha').innerText = obj.fechaHora;
+        document.getElementById('popupCodigo').innerText = obj.codigo;
+        document.getElementById('btnCopiarPopup').onclick = () => {
+            navigator.clipboard.writeText(obj.codigo);
+            alert(`¡Código ${obj.codigo} copiado!`);
         };
-
         document.getElementById('zmc-popup-overlay').classList.remove('hidden');
     }
 
@@ -413,7 +410,6 @@
         plataformaEnEdicionId = id;
         const plat = plataformasData.find(p => p.id === id);
         if (!plat) return;
-
         document.getElementById('seccionTablaPlataformas').classList.add('hidden');
         document.getElementById('seccionFormPlataforma').classList.remove('hidden');
         document.getElementById('formTitulo').innerText = "Editar Plataforma: " + plat.nombre;
@@ -439,7 +435,7 @@
             editarPlataforma(nueva.id);
         } else {
             const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
-            if (plat) { plat.nombre = nombre; }
+            if (plat) plat.nombre = nombre;
             sincronizarPlataformasCloud();
             cancelarEdicion();
         }
@@ -458,7 +454,6 @@
     function guardarAsunto() {
         const nuevoAsunto = document.getElementById('inputNuevoAsunto').value.trim();
         if (!nuevoAsunto) return;
-
         const plat = plataformasData.find(p => p.id === plataformaEnEdicionId);
         if (plat) {
             plat.asuntos.push(nuevoAsunto);
@@ -481,10 +476,7 @@
     function renderizarAsuntosAdmin(plat) {
         const lista = document.getElementById('listaAsuntos');
         lista.innerHTML = "";
-        if (plat.asuntos.length === 0) {
-            lista.innerHTML = "<p class='text-xs text-gray-500'>No hay asuntos configurados.</p>";
-            return;
-        }
+        if (plat.asuntos.length === 0) { lista.innerHTML = "<p class='text-xs text-gray-500'>No hay asuntos configurados.</p>"; return; }
         plat.asuntos.forEach((asunto, index) => {
             lista.innerHTML += `
                 <div class="flex items-center justify-between bg-[#0b132b] p-2.5 rounded-lg border border-gray-800 text-xs">
@@ -495,6 +487,5 @@
         });
     }
     </script>
-
 </body>
 </html>
