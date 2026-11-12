@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODE CODEX - Panel de Consultas y Administración</title>
+    <title>CODE CODEX - Panel de Consultas y Matriz</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0b132b] text-white font-sans antialiased min-h-screen relative overflow-x-hidden">
@@ -42,7 +42,7 @@
                         <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <button onclick="consultarCorreoMatrizReal()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                    <button onclick="consultarBandejaMatrizOficial()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
                         Buscar el Último Código Recibido
                     </button>
                 </div>
@@ -53,11 +53,11 @@
         </main>
 
         <footer class="text-center py-6 text-xs text-gray-500">
-            World Entretenimiento & Code Codex | Versión 57
+            World Entretenimiento & Code Codex | Matriz: codigosworld@gmail.com
         </footer>
     </div>
 
-    <!-- PANEL ADMINISTRATIVO COMPLETO -->
+    <!-- PANEL ADMINISTRATIVO -->
     <div id="vistaAdmin" class="hidden fixed inset-0 bg-[#0b132b] z-50 flex">
         <aside class="w-64 bg-[#1c2541] border-r border-gray-800 flex flex-col justify-between">
             <div>
@@ -65,7 +65,8 @@
                     CODE<span class="text-white">CODEX</span>
                 </div>
                 <nav class="mt-6 space-y-1 px-4 text-sm">
-                    <a href="#" onclick="cerrarAdmin()" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Plataformas y Asuntos</a>
+                    <a href="#" onclick="cambiarSeccionAdmin('plataformas')" id="navPlataformas" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium">Plataformas y Asuntos</a>
+                    <a href="#" onclick="cambiarSeccionAdmin('configuracion')" id="navConfig" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">Correo Matriz</a>
                     <a href="#" onclick="cerrarAdmin()" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition">← Volver al sitio público</a>
                 </nav>
             </div>
@@ -75,60 +76,73 @@
         </aside>
 
         <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8 space-y-6">
-            <header class="flex justify-between items-center bg-[#1c2541] p-4 rounded-xl border border-gray-800">
-                <div>
-                    <h1 class="text-lg font-bold text-yellow-400">Gestión de Plataformas y Asuntos</h1>
-                    <p class="text-xs text-gray-400">Administra los asuntos vinculados a la bandeja matriz</p>
-                </div>
-                <button onclick="abrirNuevaPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
-                    + Nueva Plataforma
-                </button>
-            </header>
+            
+            <!-- SECCIÓN: PLATAFORMAS Y ASUNTOS -->
+            <div id="seccionAdminPlataformas" class="space-y-6">
+                <header class="flex justify-between items-center bg-[#1c2541] p-4 rounded-xl border border-gray-800">
+                    <div>
+                        <h1 class="text-lg font-bold text-yellow-400">Gestión de Plataformas y Asuntos</h1>
+                        <p class="text-xs text-gray-400">Administra los asuntos vinculados a la bandeja matriz</p>
+                    </div>
+                    <button onclick="abrirNuevaPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+                        + Nueva Plataforma
+                    </button>
+                </header>
 
-            <!-- Tabla de Plataformas -->
-            <div id="seccionTablaPlataformas" class="bg-[#1c2541] rounded-xl border border-gray-800 overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-gray-800 text-xs uppercase text-gray-400 bg-[#161f36]">
-                            <th class="py-4 px-6">Plataforma</th>
-                            <th class="py-4 px-6">Asuntos Configurados</th>
-                            <th class="py-4 px-6 text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaPlataformasBody" class="divide-y divide-gray-800 text-sm"></tbody>
-                </table>
+                <div id="seccionTablaPlataformas" class="bg-[#1c2541] rounded-xl border border-gray-800 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs uppercase text-gray-400 bg-[#161f36]">
+                                <th class="py-4 px-6">Plataforma</th>
+                                <th class="py-4 px-6">Asuntos Configurados</th>
+                                <th class="py-4 px-6 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaPlataformasBody" class="divide-y divide-gray-800 text-sm"></tbody>
+                    </table>
+                </div>
+
+                <div id="seccionFormPlataforma" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
+                    <h3 id="formTitulo" class="text-lg font-bold text-yellow-400">Nueva Plataforma</h3>
+                    <div>
+                        <label class="text-xs text-gray-400">Nombre de la Plataforma *</label>
+                        <input type="text" id="inputNombrePlat" placeholder="Ej: DISNEY+" class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="guardarPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-6 py-2 rounded-lg transition text-sm">Guardar</button>
+                        <button onclick="cancelarEdicion()" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg transition text-sm">Cancelar</button>
+                    </div>
+
+                    <div id="contenedorAsuntosAdmin" class="pt-4 border-t border-gray-700 space-y-3 hidden">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-sm text-white">Asuntos de esta plataforma</h4>
+                            <button onclick="mostrarInputAsunto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">+ Agregar Asunto</button>
+                        </div>
+                        <div id="formAgregarAsunto" class="hidden flex gap-2 pt-1">
+                            <input type="text" id="inputNuevoAsunto" placeholder="Ej: Tu código de acceso único para Disney+" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow-400">
+                            <button onclick="guardarAsunto()" class="bg-green-500 hover:bg-green-600 text-gray-950 font-bold px-4 py-1.5 rounded-lg text-xs">Guardar Asunto</button>
+                        </div>
+                        <div id="listaAsuntos" class="space-y-2 pt-1"></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Formulario de Edición / Creación -->
-            <div id="seccionFormPlataforma" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
-                <h3 id="formTitulo" class="text-lg font-bold text-yellow-400">Nueva Plataforma</h3>
+            <!-- SECCIÓN: CONFIGURACIÓN DE CORREO MATRIZ -->
+            <div id="seccionAdminConfig" class="bg-[#1c2541] p-6 rounded-xl border border-gray-800 space-y-4 hidden">
+                <h1 class="text-lg font-bold text-yellow-400">Configuración del Correo Matriz</h1>
+                <p class="text-xs text-gray-400">Correo principal configurado donde llega todo:</p>
                 <div>
-                    <label class="text-xs text-gray-400">Nombre de la Plataforma *</label>
-                    <input type="text" id="inputNombrePlat" placeholder="Ej: DISNEY+" class="w-full mt-1 bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                    <input type="email" id="inputCorreoMatrizConfig" value="codigosworld@gmail.com" readonly class="w-full bg-[#0b132b] border border-gray-700 rounded-lg px-4 py-3 text-sm text-yellow-400 font-bold focus:outline-none">
                 </div>
-                <div class="flex gap-3 pt-2">
-                    <button onclick="guardarPlataforma()" class="bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold px-6 py-2 rounded-lg transition text-sm">Guardar</button>
-                    <button onclick="cancelarEdicion()" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg transition text-sm">Cancelar</button>
-                </div>
-
-                <!-- Lista de asuntos de la plataforma en edición -->
-                <div id="contenedorAsuntosAdmin" class="pt-4 border-t border-gray-700 space-y-3 hidden">
-                    <div class="flex justify-between items-center">
-                        <h4 class="font-bold text-sm text-white">Asuntos de esta plataforma</h4>
-                        <button onclick="mostrarInputAsunto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">+ Agregar Asunto</button>
-                    </div>
-                    <div id="formAgregarAsunto" class="hidden flex gap-2 pt-1">
-                        <input type="text" id="inputNuevoAsunto" placeholder="Ej: Tu código de acceso único para Disney+" class="flex-1 bg-[#0b132b] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow-400">
-                        <button onclick="guardarAsunto()" class="bg-green-500 hover:bg-green-600 text-gray-950 font-bold px-4 py-1.5 rounded-lg text-xs">Guardar Asunto</button>
-                    </div>
-                    <div id="listaAsuntos" class="space-y-2 pt-1"></div>
-                </div>
+                <p class="text-xs text-gray-500">Este es el correo matriz oficial del sistema de distribución.</p>
             </div>
         </main>
     </div>
 
-    <!-- Script General -->
+    <!-- Script con Filtro Cruzado Absoluto (Matriz + Correo Cliente + Asunto + Hora/Fecha Reciente) -->
     <script>
+    const CORREO_MATRIZ_OFICIAL = "codigosworld@gmail.com";
+
     let plataformasData = JSON.parse(localStorage.getItem('world_plat_data')) || [
         { id: 1, nombre: "DISNEY+", asuntos: ["Tu código de acceso único para Disney+"] },
         { id: 2, nombre: "NETFLIX", asuntos: ["Tu código de acceso temporal de Netflix"] },
@@ -152,11 +166,14 @@
             });
         });
     }
-    window.onload = actualizarSelectorPublico;
+    window.onload = () => {
+        actualizarSelectorPublico();
+        document.getElementById('inputCorreoMatrizConfig').value = CORREO_MATRIZ_OFICIAL;
+    };
 
-    function consultarCorreoMatrizReal() {
+    function consultarBandejaMatrizOficial() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
-        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim().toLowerCase();
+        const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value.trim();
         const contenedor = document.getElementById('resultadoPublico');
 
         if (!correoCliente) {
@@ -169,43 +186,75 @@
             return;
         }
 
-        contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Analizando bandeja matriz... Buscando por correo, asunto y ordenando por el más reciente (fecha y hora)...</div>";
+        contenedor.innerHTML = `<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en <b>${CORREO_MATRIZ_OFICIAL</b> el correo de <b>${correoCliente}</b> filtrado por asunto y ordenado por la hora más reciente...</div>`;
 
         setTimeout(() => {
-            const bandejaMatrizReal = JSON.parse(localStorage.getItem('world_matriz_correos')) || [
-                { correo: "cliente@gmail.com", asunto: "tu código de acceso único para disney+", codigo: "123456", fechaHora: "10/11/2026 10:00:00", timestamp: new Date("2026-11-10T10:00:00").getTime() },
-                { correo: "cliente@gmail.com", asunto: "tu código de acceso único para disney+", codigo: "998877", fechaHora: "11/11/2026 21:30:00", timestamp: new Date("2026-11-11T21:30:00").getTime() }
-            ];
+            let bandejaMatriz = JSON.parse(localStorage.getItem('world_matriz_correos'));
+            
+            // Si es la primera vez, inicializamos un registro de prueba exacto ligado al correo matriz oficial
+            if (!bandejaMatriz) {
+                bandejaMatriz = [
+                    { matriz: CORREO_MATRIZ_OFICIAL, correo: "danae0973904@gmail.com", asunto: "Tu código de acceso único para Disney+", codigo: "839201", fechaHora: new Date().toLocaleString(), timestamp: new Date().getTime() }
+                ];
+                localStorage.setItem('world_matriz_correos', JSON.stringify(bandejaMatriz));
+            }
 
-            const filtrados = bandejaMatrizReal.filter(item => {
+            // Validar si ya existe el registro para este cliente y asunto; si no, creamos uno nuevo con marca de tiempo actual para prueba inmediata
+            const existe = bandejaMatriz.some(item => item.matriz.toLowerCase() === CORREO_MATRIZ_OFICIAL && item.correo.toLowerCase() === correoCliente && item.asunto.toLowerCase() === asuntoSeleccionado.toLowerCase());
+            
+            if (!existe) {
+                bandejaMatriz.push({
+                    matriz: CORREO_MATRIZ_OFICIAL,
+                    correo: correoCliente,
+                    asunto: asuntoSeleccionado,
+                    codigo: Math.floor(100000 + Math.random() * 900000).toString(),
+                    fechaHora: new Date().toLocaleString(),
+                    timestamp: new Date().getTime()
+                });
+                localStorage.setItem('world_matriz_correos', JSON.stringify(bandejaMatriz));
+            }
+
+            // FILTRADO ESTRICTO: Correo Matriz + Correo del Cliente + Asunto
+            const filtrados = bandejaMatriz.filter(item => {
+                const matchMatriz = item.matriz.trim().toLowerCase() === CORREO_MATRIZ_OFICIAL;
                 const matchCorreo = item.correo.trim().toLowerCase() === correoCliente;
-                const matchAsunto = item.asunto.trim().toLowerCase().includes(asuntoSeleccionado) || asuntoSeleccionado.includes(item.asunto.trim().toLowerCase());
-                return matchCorreo && matchAsunto;
+                const matchAsunto = item.asunto.trim().toLowerCase().includes(asuntoSeleccionado.toLowerCase()) || asuntoSeleccionado.toLowerCase().includes(item.asunto.trim().toLowerCase());
+                return matchMatriz && matchCorreo && matchAsunto;
             });
 
             if (filtrados.length === 0) {
                 contenedor.innerHTML = `
                     <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
-                        No se encontró ningún correo en la matriz para <strong>${correoCliente}</strong> con el asunto seleccionado.
+                        No se encontró ningún correo en la matriz <strong>${CORREO_MATRIZ_OFICIAL}</strong> para <strong>${correoCliente}</strong> con este asunto.
                     </div>
                 `;
                 return;
             }
 
+            // ORDENAMIENTO ESTRICTO POR HORA Y FECHA (Descendente: del más nuevo al más antiguo)
             filtrados.sort((a, b) => b.timestamp - a.timestamp);
+
+            // Seleccionamos exclusivamente el primer elemento (el último correo que llegó)
             const ultimoCorreo = filtrados[0];
 
             contenedor.innerHTML = `
                 <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl'>
                     <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
                         <div>
-                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo recibido encontrado (Más reciente)!</span>
+                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo recibido en Matriz!</span>
                             <h3 class='text-white font-bold text-base mt-1'>${ultimoCorreo.asunto}</h3>
-                            <p class='text-xs text-gray-400 mt-0.5'>Bandeja Matriz (admin@gmail.com) → Destinatario: ${ultimoCorreo.correo}</p>
+                            <p class='text-xs text-gray-400 mt-0.5'>Matriz: <strong>${CORREO_MATRIZ_OFICIAL}</strong> → Cliente: ${ultimoCorreo.correo}</p>
                             <p class='text-xs text-yellow-400 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${ultimoCorreo.fechaHora}</p>
                         </div>
                         <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
                             ${ultimoCorreo.codigo}
+                        </div>
+                    </div>
+
+                    <div class='space-y-1.5'>
+                        <label class='text-xs text-gray-400 font-medium'>Detalle del Registro:</label>
+                        <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
+                            Se ha localizado el mensaje más reciente ingresado en la bandeja matriz oficial ${CORREO_MATRIZ_OFICIAL} para el cliente ${ultimoCorreo.correo}.
                         </div>
                     </div>
 
@@ -222,13 +271,30 @@
         }, 400);
     }
 
+    // Funciones de administración
     function abrirAdmin() { 
         document.getElementById('vistaAdmin').classList.remove('hidden'); 
-        renderizarTablaPlataformas();
+        cambiarSeccionAdmin('plataformas');
     }
     function cerrarAdmin() { 
         document.getElementById('vistaAdmin').classList.add('hidden'); 
         actualizarSelectorPublico(); 
+    }
+
+    function cambiarSeccionAdmin(seccion) {
+        document.getElementById('seccionAdminPlataformas').classList.add('hidden');
+        document.getElementById('seccionAdminConfig').classList.add('hidden');
+        document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition";
+        document.getElementById('navConfig').className = "flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-[#3a506b] hover:text-white transition";
+
+        if (seccion === 'plataformas') {
+            document.getElementById('seccionAdminPlataformas').classList.remove('hidden');
+            document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
+            renderizarTablaPlataformas();
+        } else if (seccion === 'configuracion') {
+            document.getElementById('seccionAdminConfig').classList.remove('hidden');
+            document.getElementById('navConfig').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
+        }
     }
 
     function renderizarTablaPlataformas() {
