@@ -192,8 +192,10 @@
         </main>
     </div>
 
-    <!-- Script General Integrado (Sin errores de servidor Vercel) -->
+    <!-- Script General con conexión real al Apps Script -->
     <script>
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3lmpp3cjfbqepZipEoJEjxjr76zTO-GcpqmOgQ5DytkFwkQsPjY7wp6rUEBNsf4Ek/exec';
+
     let plataformasData = [
         { id: 1, nombre: "CRUNCHYROLL", slug: "crunchyroll", activo: true, asuntos: ["Confirma tu nuevo inicio de sesión en Crunchyroll"] },
         { id: 2, nombre: "DISNEY", slug: "disney", activo: true, asuntos: ["Tu código de acceso único para Disney+"] },
@@ -214,7 +216,7 @@
     }
     window.onload = actualizarSelectorPublico;
 
-    // Consulta integrada autónoma para evitar cualquier fallo de servidor externo o 404
+    // Consulta real conectada al backend de Google Apps Script para extraer el último código
     async function consultarCodigoPublico() {
         const correo = document.getElementById('inputCorreoPublico').value.trim();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value;
@@ -232,41 +234,73 @@
 
         contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando el correo más reciente...</div>";
 
-        // Simulador de respuesta exitosa autónoma e instantánea
-        setTimeout(() => {
-            const codigoGenerado = Math.floor(100000 + Math.random() * 900000);
+        try {
+            const url = `${GOOGLE_SCRIPT_URL}?correo=${encodeURIComponent(correo)}&asunto=${encodeURIComponent(asuntoSeleccionado)}`;
+            const respuesta = await fetch(url);
+            const textoRespuesta = await respuesta.text();
             
+            let resultado;
+            try {
+                resultado = JSON.parse(textoRespuesta);
+            } catch (e) {
+                console.error("Respuesta del servidor:", textoRespuesta);
+                contenedor.innerHTML = `
+                    <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs overflow-x-auto'>
+                        <strong>Error al interpretar la respuesta:</strong><br>${textoRespuesta}
+                    </div>
+                `;
+                return;
+            }
+
+            if (resultado.success) {
+                const contenidoCorreo = resultado.cuerpo || resultado.body || resultado.message || "Sin contenido detallado";
+                const fechaCorreo = resultado.fecha || "Reciente";
+
+                contenedor.innerHTML = `
+                    <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl'>
+                        <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
+                            <div>
+                                <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo encontrado! (Más reciente)</span>
+                                <h3 class='text-white font-bold text-base mt-1'>${resultado.asunto || asuntoSeleccionado}</h3>
+                                <p class='text-xs text-gray-400 mt-0.5'>Recibido: ${fechaCorreo}</p>
+                            </div>
+                            <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
+                                ${resultado.codigo}
+                            </div>
+                        </div>
+
+                        <div class='space-y-1.5'>
+                            <label class='text-xs text-gray-400 font-medium'>Contenido del Correo:</label>
+                            <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
+                                ${contenidoCorreo}
+                            </div>
+                        </div>
+
+                        <div class='flex gap-3 pt-2'>
+                            <button onclick="navigator.clipboard.writeText('${resultado.codigo}'); alert('¡Código ${resultado.codigo} copiado al portapapeles!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
+                                Copiar Código (${resultado.codigo})
+                            </button>
+                            <button onclick="document.getElementById('resultadoPublico').innerHTML='';" class='bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm'>
+                                Nueva Consulta
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                contenedor.innerHTML = `
+                    <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
+                        ${resultado.message || "No se encontró ningún correo reciente."}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error("Error de red:", error);
             contenedor.innerHTML = `
-                <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl animate-fade-in'>
-                    <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
-                        <div>
-                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo encontrado!</span>
-                            <h3 class='text-white font-bold text-base mt-1'>${asuntoSeleccionado}</h3>
-                            <p class='text-xs text-gray-400 mt-0.5'>Recibido para: ${correo}</p>
-                        </div>
-                        <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
-                            ${codigoGenerado}
-                        </div>
-                    </div>
-
-                    <div class='space-y-1.5'>
-                        <label class='text-xs text-gray-400 font-medium'>Contenido del Correo:</label>
-                        <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            Estimado usuario, su código de acceso único solicitado para la cuenta ${correo} es: ${codigoGenerado}. Utilice este código para completar su inicio de sesión de forma segura.
-                        </div>
-                    </div>
-
-                    <div class='flex gap-3 pt-2'>
-                        <button onclick="navigator.clipboard.writeText('${codigoGenerado}'); alert('¡Código ${codigoGenerado} copiado al portapapeles!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
-                            Copiar Código (${codigoGenerado})
-                        </button>
-                        <button onclick="document.getElementById('resultadoPublico').innerHTML='';" class='bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm'>
-                            Nueva Consulta
-                        </button>
-                    </div>
+                <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
+                    Error de red al conectar con el servidor de correo.
                 </div>
             `;
-        }, 800);
+        }
     }
 
     // Funciones Admin
