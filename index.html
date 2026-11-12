@@ -6,7 +6,6 @@
     <title>World Entretenimiento Codex - Validador de Correo Matriz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ESTILO DE FONDO CON SU IMAGEN Y CAPA OSCURA PARA LEGISBILIDAD */
         body {
             background-image: linear-gradient(rgba(11, 19, 43, 0.8), rgba(11, 19, 43, 0.85)), url('https://tumbaabierta.com/wp-content/uploads/2012/05/wallpaper_hd_avengers-1920x1200_iron_man.jpg');
             background-size: cover;
@@ -228,6 +227,7 @@
                 if (Array.isArray(data)) {
                     plataformasData = data;
                     actualizarSelectorPublico();
+                    renderizarTablaPlataformas();
                     if(mostrarAlerta) alert("¡Datos sincronizados correctamente desde la nube!");
                 }
             })
@@ -347,13 +347,15 @@
     function cerrarAdmin() { document.getElementById('vistaAdmin').classList.add('hidden'); cargarPlataformasCloud(); }
 
     function cambiarSeccionAdmin(seccion) {
-        document.getElementById('seccionAdminPlataformas').classList.add('hidden');
-        document.getElementById('navPlataformas').className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-[#3a506b] text-white font-medium";
+        document.getElementById('seccionAdminPlataformas').classList.remove('hidden');
+        document.getElementById('seccionFormPlataforma').classList.add('hidden');
+        document.getElementById('seccionTablaPlataformas').classList.remove('hidden');
         renderizarTablaPlataformas();
     }
 
     function renderizarTablaPlataformas() {
         const tbody = document.getElementById('tablaPlataformasBody');
+        if(!tbody) return;
         tbody.innerHTML = "";
         plataformasData.forEach(plat => {
             tbody.innerHTML += `
