@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>World Entretenimiento Codex - Validador de Correo Matriz</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ESTILO DE FONDO CON SU IMAGEN Y CAPA OSCURA PARA LEGISBILIDAD */
+        body {
+            background-image: linear-gradient(rgba(11, 19, 43, 0.8), rgba(11, 19, 43, 0.85)), url('https://tumbaabierta.com/wp-content/uploads/2012/05/wallpaper_hd_avengers-1920x1200_iron_man.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-color: #0b132b;
+        }
+    </style>
 </head>
-<body class="bg-[#0b132b] text-white font-sans antialiased min-h-screen relative overflow-x-hidden flex flex-col justify-between">
-
-    <!-- Fondo Matrix sutil -->
-    <div class="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden flex justify-around text-xs font-mono text-orange-500">
-        <div>2026 8735 9941 1029 4432<br>0192 8374 5561 2234 9980</div>
-        <div>5541 2234 9980 2026 8735<br>9941 1029 4432 0192 8374</div>
-    </div>
+<body class="text-white font-sans antialiased min-h-screen relative overflow-x-hidden flex flex-col justify-between">
 
     <!-- HEADER -->
     <header class="relative z-10 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto w-full">
@@ -21,10 +26,10 @@
             <span class="text-[#ff6600]">ENTRETENIMIENTO</span>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="cargarPlataformasCloud(true)" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-gray-300 px-3 py-2 rounded-lg text-xs font-medium transition flex items-center gap-1.5" title="Sincronizar datos de la nube">
+            <button onclick="cargarPlataformasCloud(true)" class="bg-[#1c2541]/90 hover:bg-[#3a506b] border border-gray-700 text-gray-300 px-3 py-2 rounded-lg text-xs font-medium transition flex items-center gap-1.5 backdrop-blur-sm" title="Sincronizar datos de la nube">
                 🔄 Sincronizar
             </button>
-            <button onclick="intentarAbrirAdmin()" class="bg-[#1c2541] hover:bg-[#3a506b] border border-gray-700 text-[#ff6600] px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg">
+            <button onclick="intentarAbrirAdmin()" class="bg-[#1c2541]/90 hover:bg-[#3a506b] border border-gray-700 text-[#ff6600] px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg backdrop-blur-sm">
                 <span>🔑</span> Panel Admin
             </button>
         </div>
@@ -32,7 +37,7 @@
 
     <!-- WIDGET DE CONSULTA -->
     <main class="relative z-10 flex flex-col items-center justify-center px-4 my-auto">
-        <div class="w-full max-w-xl bg-[#1c2541]/95 backdrop-blur-md border border-gray-700/80 rounded-2xl p-8 shadow-2xl space-y-6">
+        <div class="w-full max-w-xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/80 rounded-2xl p-8 shadow-2xl space-y-6">
             
             <div class="text-center border-b border-gray-700 pb-5">
                 <h1 class="text-3xl font-black tracking-tight leading-none text-white">WORLD</h1>
@@ -209,9 +214,7 @@
 
     <!-- SCRIPT PRINCIPAL -->
     <script>
-    // URL FIJA DEL WEBHOOK INTEGRADA DE FÁBRICA
     const WEBHOOK_URL_FIJA = "https://script.google.com/macros/s/AKfycby3XxxRaZy78PT_EQhhoY_btuB1MQHld_YqIlpTbWbyF_jlpn-59JdU7jyI2Q8N7JCg/exec";
-
     const ADMIN_CORREO_VALIDO = "codigosworld@gmail.com";
     const ADMIN_PASS_VALIDO = "World2026*";
 
