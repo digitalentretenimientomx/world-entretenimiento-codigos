@@ -27,13 +27,13 @@
 
         <main class="flex flex-col items-center justify-center px-4 my-auto">
             <div class="w-full max-w-2xl bg-[#1c2541]/90 backdrop-blur-md border border-gray-700/60 rounded-2xl p-8 shadow-2xl space-y-6">
-                <h2 class="text-xl font-bold tracking-wide text-white uppercase text-center">CONSULTA DE CÓDIGOS - BANDEJA MATRIZ</h2>
+                <h2 class="text-xl font-bold tracking-wide text-white uppercase text-center">CONSULTA DE CÓDIGOS — MÁS RECIENTE (FECHA Y HORA)</h2>
                 
                 <div class="space-y-4 text-left">
                     <div>
                         <label class="text-xs text-gray-400 mb-1 block">Selecciona la plataforma (Asunto):</label>
                         <select id="selectPlataformaPublica" class="w-full bg-[#0b132b] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-yellow-400">
-                            <!-- Se llena dinámicamente con los asuntos configurados -->
+                            <!-- Se llena dinámicamente -->
                         </select>
                     </div>
 
@@ -42,8 +42,8 @@
                         <input type="email" id="inputCorreoPublico" placeholder="cliente@gmail.com" class="w-full bg-[#0b132b] border border-yellow-500/50 rounded-xl px-5 py-3 text-center text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <button onclick="consultarCorreoMatriz()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
-                        Buscar en Matriz
+                    <button onclick="consultarCorreoMatrizReciente()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3.5 rounded-xl transition shadow-lg text-base mt-2">
+                        Buscar Último Correo (Por Hora y Día)
                     </button>
                 </div>
 
@@ -53,7 +53,7 @@
         </main>
 
         <footer class="text-center py-6 text-xs text-gray-500">
-            World Entretenimiento & Code Codex | Versión 51
+            World Entretenimiento & Code Codex | Versión 52
         </footer>
     </div>
 
@@ -74,15 +74,13 @@
         </aside>
 
         <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8">
-            <h1 class="text-xl font-bold text-yellow-400 mb-4">Gestión de Plataformas y Asuntos</h1>
-            <p class="text-sm text-gray-400 mb-6">Aquí puedes configurar los asuntos que llegan al correo matriz para que el buscador los filtre correctamente.</p>
-            <div id="listaPlataformasAdmin" class="space-y-4"></div>
+            <h1 class="text-xl font-bold text-yellow-400 mb-4">Gestión de Asuntos y Bandeja Matriz</h1>
+            <p class="text-sm text-gray-400 mb-6">Configuración de plataformas vinculadas al correo matriz.</p>
         </main>
     </div>
 
-    <!-- Script de lógica de filtrado cruzado -->
+    <!-- Script con ordenamiento por fecha y hora -->
     <script>
-    // Lista de plataformas y sus asuntos respectivos que llegan al correo matriz
     let plataformasData = [
         { id: 1, nombre: "DISNEY+", asuntoClave: "Tu código de acceso único para Disney+" },
         { id: 2, nombre: "NETFLIX", asuntoClave: "Tu código de acceso temporal de Netflix" },
@@ -100,8 +98,7 @@
     }
     window.onload = cargarSelector;
 
-    // Función que realiza la búsqueda cruzada (Correo del cliente + Asunto de la plataforma en la bandeja matriz)
-    function consultarCorreoMatriz() {
+    function consultarCorreoMatrizReciente() {
         const correoCliente = document.getElementById('inputCorreoPublico').value.trim().toLowerCase();
         const asuntoSeleccionado = document.getElementById('selectPlataformaPublica').value;
         const contenedor = document.getElementById('resultadoPublico');
@@ -111,37 +108,73 @@
             return;
         }
 
-        contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Buscando en la bandeja matriz por asunto y correo...</div>";
+        contenedor.innerHTML = "<div class='p-4 mt-4 bg-[#0b132b] border border-gray-700 rounded-xl text-center text-yellow-400 text-sm'>Consultando bandeja matriz y ordenando por fecha y hora más reciente...</div>";
 
-        // Simulamos la búsqueda filtrada en la bandeja matriz centralizada
+        // Simulación avanzada de la bandeja matriz con múltiples registros y marcas temporales (Hora y Día)
         setTimeout(() => {
-            const codigoGenerado = Math.floor(100000 + Math.random() * 900000);
-            const fechaRecibido = new Date().toLocaleString();
+            // Simulamos correos simulados que llegaron a la matriz para este cliente
+            const bandejaMatrizSimulada = [
+                {
+                    correoDestino: correoCliente,
+                    asunto: asuntoSeleccionado,
+                    codigo: "123456",
+                    cuerpo: "Código antiguo recibido hace 2 horas.",
+                    timestamp: new Date().getTime() - (2 * 60 * 60 * 1000) // Hace 2 horas
+                },
+                {
+                    correoDestino: correoCliente,
+                    asunto: asuntoSeleccionado,
+                    codigo: "987654", // Este es el último que llegó
+                    cuerpo: "Este es el código más reciente recibido hace 5 minutos.",
+                    timestamp: new Date().getTime() - (5 * 60 * 1000) // Hace 5 minutos
+                }
+            ];
+
+            // FILTRAR estrictamente por correo y asunto
+            const filtrados = bandejaMatrizSimulada.filter(item => 
+                item.correoDestino === correoCliente && item.asunto === asuntoSeleccionado
+            );
+
+            if (filtrados.length === 0) {
+                contenedor.innerHTML = `
+                    <div class='p-4 mt-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center'>
+                        No se encontró ningún correo reciente en la matriz para ${correoCliente} con este asunto.
+                    </div>
+                `;
+                return;
+            }
+
+            // ORDENAR CRONOLÓGICAMENTE: Del más nuevo al más antiguo por hora y día (timestamp descendente)
+            filtrados.sort((a, b) => b.timestamp - a.timestamp);
+
+            // Tomamos estrictamente el primero (el último en llegar por fecha y hora)
+            const ultimoCorreo = filtrados[0];
+            const fechaHoraFormateada = new Date(ultimoCorreo.timestamp).toLocaleString();
 
             contenedor.innerHTML = `
                 <div class='mt-4 bg-[#161f36] border border-green-500/40 rounded-2xl p-6 space-y-4 shadow-2xl'>
                     <div class='flex justify-between items-start border-b border-gray-700 pb-4'>
                         <div>
-                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Coincidencia encontrada en Matriz!</span>
-                            <h3 class='text-white font-bold text-base mt-1'>${asuntoSeleccionado}</h3>
-                            <p class='text-xs text-gray-400 mt-0.5'>Bandeja matriz: admin@gmail.com → Destino: ${correoCliente}</p>
-                            <p class='text-xs text-gray-500 mt-0.5'>Recibido: ${fechaRecibido}</p>
+                            <span class='text-green-400 font-bold text-xs uppercase tracking-wider'>¡Último correo encontrado (Más reciente)!</span>
+                            <h3 class='text-white font-bold text-base mt-1'>${ultimoCorreo.asunto}</h3>
+                            <p class='text-xs text-gray-400 mt-0.5'>Matriz (admin@gmail.com) → Cliente: ${correoCliente}</p>
+                            <p class='text-xs text-yellow-500 mt-1 font-semibold'>📅 Fecha y Hora exacta: ${fechaHoraFormateada}</p>
                         </div>
                         <div class='bg-yellow-400 text-gray-950 font-black px-4 py-2 rounded-xl text-xl shadow-lg'>
-                            ${codigoGenerado}
+                            ${ultimoCorreo.codigo}
                         </div>
                     </div>
 
                     <div class='space-y-1.5'>
-                        <label class='text-xs text-gray-400 font-medium'>Contenido Extraído del Correo:</label>
+                        <label class='text-xs text-gray-400 font-medium'>Contenido del Correo:</label>
                         <div class='p-4 bg-[#0b132b] rounded-xl border border-gray-700 text-xs text-gray-300 max-h-48 overflow-y-auto font-mono leading-relaxed whitespace-pre-wrap'>
-                            Estimado usuario, hemos recibido su solicitud para la cuenta ${correoCliente}. Su código de verificación correspondiente al asunto "${asuntoSeleccionado}" es: ${codigoGenerado}.
+                            ${ultimoCorreo.cuerpo} — Código de acceso: ${ultimoCorreo.codigo}
                         </div>
                     </div>
 
                     <div class='flex gap-3 pt-2'>
-                        <button onclick="navigator.clipboard.writeText('${codigoGenerado}'); alert('¡Código ${codigoGenerado} copiado!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
-                            Copiar Código (${codigoGenerado})
+                        <button onclick="navigator.clipboard.writeText('${ultimoCorreo.codigo}'); alert('¡Código ${ultimoCorreo.codigo} copiado!');" class='flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold py-3 rounded-xl transition text-sm shadow-lg'>
+                            Copiar Código (${ultimoCorreo.codigo})
                         </button>
                         <button onclick="document.getElementById('resultadoPublico').innerHTML='';" class='bg-gray-700 hover:bg-gray-600 text-white font-bold px-5 py-3 rounded-xl transition text-sm'>
                             Nueva Consulta
@@ -149,7 +182,7 @@
                     </div>
                 </div>
             `;
-        }, 600);
+        }, 500);
     }
 
     function abrirAdmin() { document.getElementById('vistaAdmin').classList.remove('hidden'); }
